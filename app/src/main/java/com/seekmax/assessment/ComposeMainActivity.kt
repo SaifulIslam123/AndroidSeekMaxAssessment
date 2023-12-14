@@ -15,6 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.seekmax.assessment.ui.screen.HomeScreen
 import com.seekmax.assessment.ui.screen.HomeScreenViewModel
+import com.seekmax.assessment.ui.screen.LoginScreen
 import com.seekmax.assessment.ui.screen.MainScreen
 import com.seekmax.assessment.ui.screen.UserDetailScreen
 import com.seekmax.assessment.ui.screen.UserDetailScreenViewModel
@@ -29,21 +30,6 @@ class ComposeMainActivity : ComponentActivity() {
         setContent {
             Practice_jetpack_composeTheme {
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    /* val navController = rememberNavController()
-                     NavHost(navController = navController, startDestination = "home") {
-                         composable("home") {
-
-                             HomeScreen(navController)
-                         }
-                         composable("users/{userId}") { backStackEntry ->
-                             UserDetailScreen(
-                                 navController,
-                                 (backStackEntry.arguments?.getString("userId", "")
-                                     ?: "").toLong()
-                             )
-                         }
-                     }*/
-
                     MainScreen()
                 }
             }

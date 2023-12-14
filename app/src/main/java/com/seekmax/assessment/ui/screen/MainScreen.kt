@@ -6,16 +6,22 @@ import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.seekmax.assessment.R
+import com.seekmax.assessment.ui.theme.Purple40
+import com.seekmax.assessment.ui.theme.PurpleGrey40
+import com.seekmax.assessment.ui.theme.textPrimary
+import com.seekmax.assessment.ui.theme.textSecondary
 
 
 sealed class BottomNavigationScreens(val route: String, val name: String, val icon: Int) {
@@ -31,7 +37,7 @@ private fun AppBottomNavigation(
     navController: NavHostController,
     items: List<BottomNavigationScreens>
 ) {
-    BottomNavigation {
+    BottomNavigation(backgroundColor = textPrimary) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
         items.forEach { screen ->
@@ -39,7 +45,7 @@ private fun AppBottomNavigation(
                 icon = { },
                 label = { Text(screen.name) },
                 selectedContentColor = Color.White,
-                unselectedContentColor = Color.Green,
+                unselectedContentColor = textSecondary,
                 alwaysShowLabel = true,
                 selected = currentRoute == screen.route,
                 onClick = {
@@ -97,7 +103,7 @@ private fun MainScreenNavigationConfigurations(
 ) {
     NavHost(navController, startDestination = BottomNavigationScreens.Home.route) {
         composable(BottomNavigationScreens.Home.route) { HomeScreen(navController = navController) }
-        composable(BottomNavigationScreens.Profile.route) { HomeScreen(navController = navController) }
+        composable(BottomNavigationScreens.Profile.route) { ProfileScreen(navController = navController) }
         composable("users/{userId}") { backStackEntry ->
             UserDetailScreen(
                 navController,

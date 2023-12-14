@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.seekmax.assessment.repository.User
@@ -42,7 +43,7 @@ fun UserDetailScreen(navController: NavController, userId: Long) {
         content = { padding ->
             Column(modifier = Modifier.padding(padding)) {
                 vm.load(userId = userId)
-                val user by vm.user.collectAsState()
+                val user by vm.user.collectAsStateWithLifecycle()
                 Column(Modifier.padding(all = 16.dp)) {
                     Text(
                         text = "Hello, I'm ${user?.name ?: ""}",
