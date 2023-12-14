@@ -90,7 +90,10 @@ dependencies {
     implementation "androidx.compose.material3:material3:1.1.2"
     implementation "androidx.compose.material3:material3-window-size-class:1.1.2"
 
-    implementation "androidx.navigation:navigation-compose:2.7.5"
+    implementation "androidx.navigation:navigation-compose:2.7.6"
     implementation 'androidx.hilt:hilt-navigation-compose:1.1.0'
+    implementation "androidx.compose.material:material:1.5.4"
+    implementation 'androidx.ui:ui-layout:0.1.0-dev03'
+
 
 }
