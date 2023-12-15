@@ -1,0 +1,11 @@
+query Active($limit: Int, $page: Int) {
+    active (limit: $limit, page: $page) {
+        hasNext
+        jobs {
+            positionTitle
+            description
+            industry
+            haveIApplied
+        }
+    }
+}

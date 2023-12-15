@@ -1,5 +1,6 @@
 package com.seekmax.assessment.ui.screen
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -21,10 +22,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.seekmax.assessment.USER_TOKEN
 import com.seekmax.assessment.ui.theme.button
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @Composable
@@ -33,7 +38,7 @@ fun ProfileScreen(navController: NavController) {
     val viewModel: ProfileViewModel = hiltViewModel()
     viewModel.login()
     val login by viewModel.loginState.collectAsStateWithLifecycle()
-    if (login) ProfileView() else NonLoginView()
+    if (login == true) ProfileView() else NonLoginView()
 }
 
 @Composable
@@ -71,11 +76,15 @@ fun ProfileView() {
 
 
 @HiltViewModel
-class ProfileViewModel @Inject constructor() :
+class ProfileViewModel @Inject constructor(private var preferences: SharedPreferences) :
     ViewModel() {
 
-    val loginState = MutableStateFlow(false)
+    val loginState = MutableStateFlow(preferences.getString(USER_TOKEN, "")?.isNotEmpty())
     fun login() {
-        loginState.value = false
+        viewModelScope.launch {
+            delay(3000)
+            preferences.edit().putString(USER_TOKEN, "token").apply()
+            loginState.value = preferences.getString(USER_TOKEN, "")?.isNotEmpty()
+        }
     }
 }

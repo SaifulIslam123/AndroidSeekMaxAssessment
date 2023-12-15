@@ -18,121 +18,146 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.seekmax.assessment.repository.User
-import com.seekmax.assessment.repository.UserRepository
+import com.apollographql.apollo3.ApolloClient
+import com.seekmax.assessment.ActiveQuery
+import com.seekmax.assessment.model.ActiveJob
+import com.seekmax.assessment.model.toActiveJob
+import com.seekmax.assessment.repository.NetworkResult
 import com.seekmax.assessment.ui.theme.backgroundSecondary
 import com.seekmax.assessment.ui.theme.textPrimary
 import com.seekmax.assessment.ui.theme.textSecondary
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController) {
 
     val vm: HomeScreenViewModel = hiltViewModel()
-
+    vm.getActiveJobResponse()
     Scaffold(
         /*topBar = {
         TopAppBar(title = {
             Text(text = "Users")
         })
     }, */content = { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .background(backgroundSecondary)
-        ) {
-            /*val users by vm.users.collectAsStateWithLifecycle()
-            users.forEach { user ->
-                ClickableText(text = AnnotatedString(user.name), Modifier.padding(all = 16.dp),
-                    onClick = {
-                        navController.navigate("users/${user.id}")
-                    })
-            }*/
-
-            val list = listOf("Job-1", "Job-2", "Job-3", "Job-4", "Job-5")
-
-            LazyColumn(
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .background(backgroundSecondary)
             ) {
-                items(list) {
-                    JobItemView(it)
+
+                vm.getActiveJobResponse()
+                val activeJobList by vm.activeJobStateFlow.collectAsStateWithLifecycle()
+
+                LazyColumn(
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(activeJobList.data ?: emptyList()) {
+                        JobItemView(it)
+                    }
                 }
             }
-
-
-        }
-
-
-    })
+        })
 }
 
 @Composable
-fun JobItemView(data: String) {
-    Card(
-        shape = RoundedCornerShape(5.dp),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 10.dp
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { Log.d("test", "card click $data") }, colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.onPrimary
-        )
-    ) {
-        Column(
+fun JobItemView(it: ActiveJob) {
+
+
+        Card(
+            shape = RoundedCornerShape(5.dp),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 10.dp
+            ),
             modifier = Modifier
-                .padding(10.dp)
+                .fillMaxWidth()
+                .clickable { Log.d("test", "card click ") }, colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.onPrimary
+            )
         ) {
-            Row(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier
+                    .padding(10.dp)
+            ) {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        it.positionTitle,
+                        color = textPrimary,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    if (it.haveIApplied) {
+                        Icon(
+                            Icons.Default.Lock,
+                            contentDescription = ""
+                        )
+                    }
+                }
                 Text(
-                    "$data",
-                    color = textPrimary,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    it.industry.toString(),
+                    color = textSecondary,
+                    style = MaterialTheme.typography.bodyLarge
                 )
-                Icon(
-                    Icons.Default.Lock,
-                    contentDescription = ""
+                Spacer(modifier = Modifier.height(26.dp))
+                Text(
+                    it.description,
+                    color = textPrimary,
+                    style = MaterialTheme.typography.bodyLarge
                 )
             }
-            Text(
-                "Company name 1", color = textSecondary, style = MaterialTheme.typography.bodyLarge
-            )
-            Spacer(modifier = Modifier.height(26.dp))
-            Text(
-                "At present all cards look smashed together. Let’s give some padding between each card and padding on top of the first card, bottom of last card, left of all",
-                color = textPrimary,
-                style = MaterialTheme.typography.bodyLarge
-            )
         }
-    }
+
+
+
 }
 
 @HiltViewModel
-class HomeScreenViewModel @Inject constructor(private val userRepository: UserRepository) :
+class HomeScreenViewModel @Inject constructor(private val homeRepository: HomeRepository) :
     ViewModel() {
-    private val _users = MutableStateFlow(userRepository.getUsers())
-    val users: StateFlow<List<User>> = _users
+
+    val activeJobStateFlow =
+        MutableStateFlow<NetworkResult<List<ActiveJob>>>(NetworkResult.Loading())
+
+    fun getActiveJobResponse() = viewModelScope.launch {
+       val response = homeRepository.getActiveJobList()
+        activeJobStateFlow.value = response
+    }
+
+}
+
+class HomeRepository @Inject constructor(private val apolloClient: ApolloClient) {
+
+    suspend fun getActiveJobList(): NetworkResult<List<ActiveJob>> {
+
+        val response = apolloClient.query(ActiveQuery()).execute()
+        val res = response.data?.active?.jobs
+        val result = res?.map {
+            it.toActiveJob()
+        } ?: emptyList()
+
+
+        return NetworkResult.Success(data = result)
+    }
+
 }

@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
     id 'com.google.dagger.hilt.android'
+    id 'com.apollographql.apollo3'
 }
 
 android {
@@ -45,6 +46,12 @@ android {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
+    }
+}
+apollo {
+    service("service"){
+        packageName.set("com.seekmax.assessment")
+        generateKotlinModels.set(true)
     }
 }
 
@@ -97,5 +104,5 @@ dependencies {
     implementation 'androidx.ui:ui-layout:0.1.0-dev03'
     implementation "androidx.compose.material:material-icons-extended:1.5.4"
 
-
+    implementation("com.apollographql.apollo3:apollo-runtime:3.8.2")
 }
