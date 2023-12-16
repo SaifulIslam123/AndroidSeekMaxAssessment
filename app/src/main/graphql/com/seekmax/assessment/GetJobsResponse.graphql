@@ -2,6 +2,7 @@ query Active($limit: Int, $page: Int) {
     active (limit: $limit, page: $page) {
         hasNext
         jobs {
+            _id
             positionTitle
             description
             industry

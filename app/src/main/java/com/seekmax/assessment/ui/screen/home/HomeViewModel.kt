@@ -24,11 +24,13 @@ import javax.inject.Inject
 class HomeScreenViewModel @Inject constructor(private val homeRepository: HomeRepository) :
     ViewModel() {
 
+    private val TAG = "HomeViewModel"
+
     val activeJobListState =
         MutableStateFlow<NetworkResult<List<ActiveJob>>>(NetworkResult.Empty())
 
     init {
-        Log.d("Home", "init")
+        Log.d(TAG, "init")
         getActiveJobList(null)
     }
 
@@ -40,7 +42,7 @@ class HomeScreenViewModel @Inject constructor(private val homeRepository: HomeRe
 
     override fun onCleared() {
         super.onCleared()
-        Log.d("Home", "onCleared")
+        Log.d(TAG, "onCleared")
     }
 
 }
@@ -58,7 +60,6 @@ class HomeRepository @Inject constructor(private val apolloClient: ApolloClient)
                 )
             ).execute()
             val list = response.data?.active?.jobs?.map { it.toActiveJob() } ?: emptyList()
-            Log.d("testjob", "list ${list.size}")
             emit(NetworkResult.Success(data = list))
         }.catch {
             emit(NetworkResult.Error(it.message.toString()))

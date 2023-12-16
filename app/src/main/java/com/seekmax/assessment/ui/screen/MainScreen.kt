@@ -17,6 +17,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.seekmax.assessment.R
 import com.seekmax.assessment.ui.screen.home.HomeScreen
+import com.seekmax.assessment.ui.screen.jobdetail.JobDetailScreen
 import com.seekmax.assessment.ui.screen.login.LoginScreen
 import com.seekmax.assessment.ui.screen.profile.ProfileScreen
 import com.seekmax.assessment.ui.theme.textPrimary
@@ -24,17 +25,20 @@ import com.seekmax.assessment.ui.theme.textSecondary
 
 
 sealed class BottomNavigationScreens(
+    val routePrefix: String = "",
     val route: String,
-    val name: String,
-    val icon: Int = -1
+    val name: String
 ) {
     object Home :
-        BottomNavigationScreens("home", "Home", R.drawable.ic_edit)
+        BottomNavigationScreens(route = "home", name = "Home")
 
     object Profile :
-        BottomNavigationScreens("profile", "Profile", R.drawable.ic_edit)
+        BottomNavigationScreens(route = "profile", name = "Profile")
 
-    object Login : BottomNavigationScreens("login", "Login")
+    object Login : BottomNavigationScreens(route = "login", name = "Login")
+
+    object JobDetail :
+        BottomNavigationScreens("jobdetail/", "jobdetail/{jobId}", name = "Job Detail")
 }
 
 @Composable
@@ -109,14 +113,15 @@ private fun MainScreenNavigationConfigurations(
     NavHost(navController, startDestination = BottomNavigationScreens.Home.route) {
         composable(BottomNavigationScreens.Home.route) { HomeScreen(navController = navController) }
         composable(BottomNavigationScreens.Profile.route) { ProfileScreen(navController = navController) }
-        composable("users/{userId}") { backStackEntry ->
-            UserDetailScreen(
-                navController,
-                (backStackEntry.arguments?.getString("userId", "")
-                    ?: "").toLong()
+        composable(BottomNavigationScreens.Login.route) { LoginScreen(navController = navController) }
+        composable(BottomNavigationScreens.JobDetail.route) { backStackEntry ->
+            JobDetailScreen(
+                navController = navController,
+                jobId = backStackEntry.arguments?.getString(
+                    "jobId"/*BottomNavigationScreens.JobDetail.name*/, ""
+                ) ?: ""
             )
         }
-        composable(BottomNavigationScreens.Login.route) { LoginScreen(navController = navController) }
 
     }
 }

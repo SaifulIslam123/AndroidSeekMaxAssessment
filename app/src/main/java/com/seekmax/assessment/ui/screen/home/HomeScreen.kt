@@ -1,6 +1,5 @@
 package com.seekmax.assessment.ui.screen.home
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,11 +15,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,29 +28,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.apollographql.apollo3.ApolloClient
-import com.apollographql.apollo3.api.Optional
-import com.seekmax.assessment.ActiveQuery
 import com.seekmax.assessment.R
 import com.seekmax.assessment.model.ActiveJob
-import com.seekmax.assessment.model.toActiveJob
 import com.seekmax.assessment.repository.NetworkResult
+import com.seekmax.assessment.ui.screen.BottomNavigationScreens
 import com.seekmax.assessment.ui.theme.backgroundSecondary
 import com.seekmax.assessment.ui.theme.textPrimary
 import com.seekmax.assessment.ui.theme.textSecondary
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @Composable
 fun HomeScreen(navController: NavController) {
@@ -74,12 +56,6 @@ fun HomeScreen(navController: NavController) {
 
                 val activeJobList by viewModel.activeJobListState.collectAsStateWithLifecycle()
                 when (activeJobList) {
-                    is NetworkResult.Loading -> {
-                    }
-
-                    is NetworkResult.Error -> {
-                    }
-
                     is NetworkResult.Success -> {
                         activeJobList.data?.let {
                             LazyColumn(
@@ -87,7 +63,7 @@ fun HomeScreen(navController: NavController) {
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 items(it) {
-                                    JobItemView(it)
+                                    JobItemView(navController, it)
                                 }
                             }
                         }
@@ -101,7 +77,7 @@ fun HomeScreen(navController: NavController) {
 }
 
 @Composable
-fun JobItemView(it: ActiveJob) {
+fun JobItemView(navController: NavController, it: ActiveJob) {
 
 
     Card(
@@ -111,7 +87,9 @@ fun JobItemView(it: ActiveJob) {
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { Log.d("test", "card click ") }, colors = CardDefaults.cardColors(
+            .clickable {
+                navController.navigate("${BottomNavigationScreens.JobDetail.routePrefix}${it.id}")
+            }, colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.onPrimary
         )
     ) {

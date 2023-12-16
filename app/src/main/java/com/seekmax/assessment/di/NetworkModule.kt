@@ -57,6 +57,7 @@ object NetworkModule {
     fun provideApolloClient(okHttpClient: OkHttpClient): ApolloClient {
         return ApolloClient.Builder()
             .serverUrl("http://172.22.240.1:3002")
+           // .serverUrl("http://192.168.1.6:3002")
             .okHttpClient(okHttpClient)
             .build()
     }
