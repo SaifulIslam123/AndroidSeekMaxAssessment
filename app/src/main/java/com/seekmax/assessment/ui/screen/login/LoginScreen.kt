@@ -1,6 +1,5 @@
-package com.seekmax.assessment.ui.screen
+package com.seekmax.assessment.ui.screen.login
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -39,15 +38,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.seekmax.assessment.repository.NetworkResult
+import com.seekmax.assessment.ui.screen.BottomNavigationScreens
 import com.seekmax.assessment.ui.theme.button
 
 @Composable
 fun LoginScreen(navController: NavController) {
+    val viewModel: LoginViewModel = hiltViewModel()
+    PerformLogin(navController, viewModel = viewModel)
 
     Surface {
         var credentials by remember { mutableStateOf(Credentials()) }
-
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -56,22 +60,22 @@ fun LoginScreen(navController: NavController) {
                 .padding(horizontal = 30.dp)
         ) {
             LoginField(
-                value = credentials.login,
-                onChange = { data -> credentials = credentials.copy(login = data) },
+                value = credentials.userName,
+                onChange = { data -> credentials = credentials.copy(userName = data) },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(20.dp))
             PasswordField(
-                value = credentials.pwd,
-                onChange = { data -> credentials = credentials.copy(pwd = data) },
+                value = credentials.password,
+                onChange = { data -> credentials = credentials.copy(password = data) },
                 submit = {
-                    //    if (!checkCredentials(credentials, context)) credentials = Credentials()
                 },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(30.dp))
             Button(
                 onClick = {
+                    viewModel.login(credentials.userName, credentials.password)
                 },
                 enabled = credentials.isNotEmpty(),
                 shape = RoundedCornerShape(5.dp),
@@ -84,13 +88,29 @@ fun LoginScreen(navController: NavController) {
     }
 }
 
+@Composable
+fun PerformLogin(navController: NavController, viewModel: LoginViewModel) {
+    val loginState by viewModel.loginState.collectAsStateWithLifecycle()
+    when (loginState) {
+        is NetworkResult.Loading -> {}
+        is NetworkResult.Success -> {
+            navController.navigate(BottomNavigationScreens.Home.route) { popUpTo(0) }
+        }
+
+        is NetworkResult.Error -> {}
+        else -> {}
+    }
+
+
+}
+
 data class Credentials(
-    var login: String = "",
-    var pwd: String = "",
+    var userName: String = "",
+    var password: String = "",
     var remember: Boolean = false
 ) {
     fun isNotEmpty(): Boolean {
-        return login.isNotEmpty() && pwd.isNotEmpty()
+        return userName.isNotEmpty() && password.isNotEmpty()
     }
 }
 

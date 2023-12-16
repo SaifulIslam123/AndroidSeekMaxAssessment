@@ -6,30 +6,33 @@ import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.seekmax.assessment.R
-import com.seekmax.assessment.ui.theme.Purple40
-import com.seekmax.assessment.ui.theme.PurpleGrey40
+import com.seekmax.assessment.ui.screen.login.LoginScreen
 import com.seekmax.assessment.ui.theme.textPrimary
 import com.seekmax.assessment.ui.theme.textSecondary
 
 
-sealed class BottomNavigationScreens(val route: String, val name: String, val icon: Int) {
+sealed class BottomNavigationScreens(
+    val route: String,
+    val name: String,
+    val icon: Int = -1
+) {
     object Home :
         BottomNavigationScreens("home", "Home", R.drawable.ic_edit)
 
     object Profile :
         BottomNavigationScreens("profile", "Profile", R.drawable.ic_edit)
+
+    object Login : BottomNavigationScreens("login", "Login")
 }
 
 @Composable
@@ -111,6 +114,7 @@ private fun MainScreenNavigationConfigurations(
                     ?: "").toLong()
             )
         }
+        composable(BottomNavigationScreens.Login.route) { LoginScreen(navController = navController) }
 
     }
 }

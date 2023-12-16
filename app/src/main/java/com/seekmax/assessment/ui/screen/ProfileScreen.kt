@@ -1,6 +1,7 @@
 package com.seekmax.assessment.ui.screen
 
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -36,13 +37,12 @@ import javax.inject.Inject
 fun ProfileScreen(navController: NavController) {
 
     val viewModel: ProfileViewModel = hiltViewModel()
-    viewModel.login()
     val login by viewModel.loginState.collectAsStateWithLifecycle()
-    if (login == true) ProfileView() else NonLoginView()
+    if (login == true) ProfileView() else NonLoginView(navController)
 }
 
 @Composable
-fun NonLoginView() {
+fun NonLoginView(navController: NavController) {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -59,6 +59,7 @@ fun NonLoginView() {
         Spacer(modifier = Modifier.height(30.dp))
         Button(
             onClick = {
+                navController.navigate(BottomNavigationScreens.Login.route)
             },
             shape = RoundedCornerShape(5.dp),
             modifier = Modifier.fillMaxWidth(),
@@ -78,6 +79,10 @@ fun ProfileView() {
 @HiltViewModel
 class ProfileViewModel @Inject constructor(private var preferences: SharedPreferences) :
     ViewModel() {
+
+    init {
+        Log.d("profileTOken:", "${preferences.getString(USER_TOKEN, "")}")
+    }
 
     val loginState = MutableStateFlow(preferences.getString(USER_TOKEN, "")?.isNotEmpty())
     fun login() {

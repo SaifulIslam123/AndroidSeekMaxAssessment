@@ -34,6 +34,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.apollographql.apollo3.ApolloClient
+import com.apollographql.apollo3.api.Optional
 import com.seekmax.assessment.ActiveQuery
 import com.seekmax.assessment.model.ActiveJob
 import com.seekmax.assessment.model.toActiveJob
@@ -42,15 +43,19 @@ import com.seekmax.assessment.ui.theme.backgroundSecondary
 import com.seekmax.assessment.ui.theme.textPrimary
 import com.seekmax.assessment.ui.theme.textSecondary
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @Composable
 fun HomeScreen(navController: NavController) {
 
-    val vm: HomeScreenViewModel = hiltViewModel()
-    vm.getActiveJobResponse()
+    val viewModel: HomeScreenViewModel = hiltViewModel()
     Scaffold(
         /*topBar = {
         TopAppBar(title = {
@@ -63,15 +68,28 @@ fun HomeScreen(navController: NavController) {
                     .background(backgroundSecondary)
             ) {
 
-                vm.getActiveJobResponse()
-                val activeJobList by vm.activeJobStateFlow.collectAsStateWithLifecycle()
+                val activeJobList by viewModel.activeJobListState.collectAsStateWithLifecycle()
+                when (activeJobList) {
+                    is NetworkResult.Loading -> {
+                    }
 
-                LazyColumn(
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(activeJobList.data ?: emptyList()) {
-                        JobItemView(it)
+                    is NetworkResult.Error -> {
+                    }
+
+                    is NetworkResult.Success -> {
+                        activeJobList.data?.let {
+                            LazyColumn(
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(it) {
+                                    JobItemView(it)
+                                }
+                            }
+                        }
+                    }
+
+                    else -> {
                     }
                 }
             }
@@ -82,52 +100,51 @@ fun HomeScreen(navController: NavController) {
 fun JobItemView(it: ActiveJob) {
 
 
-        Card(
-            shape = RoundedCornerShape(5.dp),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 10.dp
-            ),
+    Card(
+        shape = RoundedCornerShape(5.dp),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 10.dp
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { Log.d("test", "card click ") }, colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.onPrimary
+        )
+    ) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .clickable { Log.d("test", "card click ") }, colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.onPrimary
-            )
+                .padding(10.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(10.dp)
-            ) {
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        it.positionTitle,
-                        color = textPrimary,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.weight(1f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    if (it.haveIApplied) {
-                        Icon(
-                            Icons.Default.Lock,
-                            contentDescription = ""
-                        )
-                    }
-                }
+            Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    it.industry.toString(),
-                    color = textSecondary,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Spacer(modifier = Modifier.height(26.dp))
-                Text(
-                    it.description,
+                    it.positionTitle,
                     color = textPrimary,
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
+                if (it.haveIApplied) {
+                    Icon(
+                        Icons.Default.Lock,
+                        contentDescription = ""
+                    )
+                }
             }
+            Text(
+                it.industry.toString(),
+                color = textSecondary,
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Spacer(modifier = Modifier.height(26.dp))
+            Text(
+                it.description,
+                color = textPrimary,
+                style = MaterialTheme.typography.bodyLarge
+            )
         }
-
+    }
 
 
 }
@@ -136,28 +153,34 @@ fun JobItemView(it: ActiveJob) {
 class HomeScreenViewModel @Inject constructor(private val homeRepository: HomeRepository) :
     ViewModel() {
 
-    val activeJobStateFlow =
-        MutableStateFlow<NetworkResult<List<ActiveJob>>>(NetworkResult.Loading())
+    val activeJobListState =
+        MutableStateFlow<NetworkResult<List<ActiveJob>>>(NetworkResult.Empty())
 
-    fun getActiveJobResponse() = viewModelScope.launch {
-       val response = homeRepository.getActiveJobList()
-        activeJobStateFlow.value = response
+    init {
+        getActiveJobList(null)
+    }
+
+    private fun getActiveJobList(search: String?) = viewModelScope.launch {
+        homeRepository.getActiveJobList(search ?: "").collect {
+            activeJobListState.value = it
+        }
     }
 
 }
 
 class HomeRepository @Inject constructor(private val apolloClient: ApolloClient) {
 
-    suspend fun getActiveJobList(): NetworkResult<List<ActiveJob>> {
+    fun getActiveJobList(search: String): Flow<NetworkResult<List<ActiveJob>>> {
 
-        val response = apolloClient.query(ActiveQuery()).execute()
-        val res = response.data?.active?.jobs
-        val result = res?.map {
-            it.toActiveJob()
-        } ?: emptyList()
-
-
-        return NetworkResult.Success(data = result)
+        return flow {
+            emit(NetworkResult.Loading())
+            val response = apolloClient.query(ActiveQuery(Optional.present(100),Optional.present(1))).execute()
+            val list = response.data?.active?.jobs?.map { it.toActiveJob() } ?: emptyList()
+            Log.d("testjob", "list ${list.size}")
+            emit(NetworkResult.Success(data = list))
+        }.catch {
+            emit(NetworkResult.Error(it.message.toString()))
+        }.flowOn(Dispatchers.IO)
     }
 
 }

@@ -10,8 +10,8 @@ data class ActiveJob(
 )
 
 fun ActiveQuery.Job.toActiveJob() = ActiveJob(
-    positionTitle = positionTitle ?: "",
-    description = description ?: "",
-    industry = industry ?: 0,
-    haveIApplied = haveIApplied ?: false
+    positionTitle = positionTitle,
+    description = description,
+    industry = industry,
+    haveIApplied = haveIApplied
 )
