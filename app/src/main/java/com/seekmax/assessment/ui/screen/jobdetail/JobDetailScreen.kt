@@ -1,7 +1,6 @@
 package com.seekmax.assessment.ui.screen.jobdetail
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,6 +21,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,8 +34,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.seekmax.assessment.JobQuery
 import com.seekmax.assessment.R
-import com.seekmax.assessment.model.Job
+import com.seekmax.assessment.RELOAD_DATA
 import com.seekmax.assessment.repository.NetworkResult
 import com.seekmax.assessment.ui.screen.BottomNavigationScreens
 import com.seekmax.assessment.ui.theme.button
@@ -44,7 +47,7 @@ import com.seekmax.assessment.ui.theme.textPrimary
 fun JobDetailScreen(navController: NavController, jobId: String) {
 
     val viewModel: JobDetailViewModel = hiltViewModel()
-    val jobState by viewModel.jobState.collectAsStateWithLifecycle()
+    val jobState by viewModel.jobDetailState.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) {
         viewModel.getJobDetail(jobId)
@@ -55,7 +58,7 @@ fun JobDetailScreen(navController: NavController, jobId: String) {
 
             when (jobState) {
                 is NetworkResult.Success -> {
-                    showJobDetail(navController, jobState.data!!)
+                    showJobDetail(navController, jobState.data!!, viewModel)
                 }
 
                 else -> {}
@@ -66,7 +69,22 @@ fun JobDetailScreen(navController: NavController, jobId: String) {
 }
 
 @Composable
-fun showJobDetail(navController: NavController, job: Job) {
+fun showJobDetail(navController: NavController, job: JobQuery.Job, viewModel: JobDetailViewModel) {
+
+    var jobAppliedState by remember { mutableStateOf(job.haveIApplied) }
+    val applyJobState by viewModel.applyJobState.collectAsStateWithLifecycle()
+
+    when (applyJobState) {
+        is NetworkResult.Success -> {
+            jobAppliedState = true
+            navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.set(RELOAD_DATA, true)
+        }
+
+        else -> {}
+    }
+
     Scaffold(
         content = {
             Surface(modifier = Modifier.padding(it)) {
@@ -78,7 +96,7 @@ fun showJobDetail(navController: NavController, job: Job) {
                     Spacer(modifier = Modifier.height(50.dp))
                     Row(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                            "${job.id}",
+                            job._id,
                             color = textPrimary,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
@@ -86,12 +104,11 @@ fun showJobDetail(navController: NavController, job: Job) {
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
-                        if (job.haveIApplied) {
+                        if (jobAppliedState) {
                             Image(
                                 painterResource(R.drawable.ic_check),
                                 contentDescription = "",
                                 modifier = Modifier.size(20.dp)
-
                             )
                         }
                     }
@@ -106,7 +123,7 @@ fun showJobDetail(navController: NavController, job: Job) {
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
-                        "Salary: ${job.minSalary} - ${job.maxSalary}",
+                        "Salary: ${job.salaryRange.min} - ${job.salaryRange.max}",
                         color = textPrimary,
                         style = MaterialTheme.typography.bodyLarge
                     )
@@ -115,7 +132,7 @@ fun showJobDetail(navController: NavController, job: Job) {
                         color = textPrimary,
                         style = MaterialTheme.typography.bodyLarge
                     )
-                    if (!job.haveIApplied) {
+                    if (!jobAppliedState) {
                         Spacer(modifier = Modifier.height(50.dp))
                         Box(
                             modifier = Modifier.fillMaxWidth(),
@@ -123,8 +140,11 @@ fun showJobDetail(navController: NavController, job: Job) {
                         ) {
                             Button(
                                 onClick = {
-                                    navController.navigate(BottomNavigationScreens.Profile.route)
-
+                                    if (viewModel.isUserLoggedIn()) {
+                                        viewModel.applyJob(job._id)
+                                    } else {
+                                        navController.navigate(BottomNavigationScreens.Profile.route)
+                                    }
                                 },
                                 shape = RoundedCornerShape(5.dp),
                                 modifier = Modifier

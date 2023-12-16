@@ -51,7 +51,7 @@ fun LoginScreen(navController: NavController) {
     PerformLogin(navController, viewModel = viewModel)
 
     Surface {
-        var credentials by remember { mutableStateOf(Credentials()) }
+        var credentialsState by remember { mutableStateOf(Credentials()) }
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -60,14 +60,14 @@ fun LoginScreen(navController: NavController) {
                 .padding(horizontal = 30.dp)
         ) {
             LoginField(
-                value = credentials.userName,
-                onChange = { data -> credentials = credentials.copy(userName = data) },
+                value = credentialsState.userName,
+                onChange = { data -> credentialsState = credentialsState.copy(userName = data) },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(20.dp))
             PasswordField(
-                value = credentials.password,
-                onChange = { data -> credentials = credentials.copy(password = data) },
+                value = credentialsState.password,
+                onChange = { data -> credentialsState = credentialsState.copy(password = data) },
                 submit = {
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -75,9 +75,9 @@ fun LoginScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(30.dp))
             Button(
                 onClick = {
-                    viewModel.login(credentials.userName, credentials.password)
+                    viewModel.login(credentialsState.userName, credentialsState.password)
                 },
-                enabled = credentials.isNotEmpty(),
+                enabled = credentialsState.isNotEmpty(),
                 shape = RoundedCornerShape(5.dp),
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = button)
@@ -96,12 +96,9 @@ fun PerformLogin(navController: NavController, viewModel: LoginViewModel) {
         is NetworkResult.Success -> {
             navController.navigate(BottomNavigationScreens.Home.route) { popUpTo(0) }
         }
-
         is NetworkResult.Error -> {}
         else -> {}
     }
-
-
 }
 
 data class Credentials(

@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class ProfileViewModel @Inject constructor(preferences: SharedPreferences) :
+class ProfileViewModel @Inject constructor(val preferences: SharedPreferences) :
     ViewModel() {
-    val loginState = MutableStateFlow(preferences.getString(USER_TOKEN, "")?.isNotEmpty())
+    fun isUserLoggedIn() = preferences.getString(USER_TOKEN, "")?.isNotEmpty() ?: false
 }

@@ -27,14 +27,14 @@ class HomeScreenViewModel @Inject constructor(private val homeRepository: HomeRe
     private val TAG = "HomeViewModel"
 
     val activeJobListState =
-        MutableStateFlow<NetworkResult<List<ActiveJob>>>(NetworkResult.Empty())
+        MutableStateFlow<NetworkResult<List<ActiveQuery.Job>>>(NetworkResult.Empty())
 
     init {
         Log.d(TAG, "init")
         getActiveJobList(null)
     }
 
-    private fun getActiveJobList(search: String?) = viewModelScope.launch {
+    fun getActiveJobList(search: String? = null) = viewModelScope.launch {
         homeRepository.getActiveJobList(search ?: "").collect {
             activeJobListState.value = it
         }
@@ -44,26 +44,4 @@ class HomeScreenViewModel @Inject constructor(private val homeRepository: HomeRe
         super.onCleared()
         Log.d(TAG, "onCleared")
     }
-
-}
-
-class HomeRepository @Inject constructor(private val apolloClient: ApolloClient) {
-
-    fun getActiveJobList(search: String): Flow<NetworkResult<List<ActiveJob>>> {
-
-        return flow {
-            emit(NetworkResult.Loading())
-            val response = apolloClient.query(
-                ActiveQuery(
-                    Optional.present(100),
-                    Optional.present(1)
-                )
-            ).execute()
-            val list = response.data?.active?.jobs?.map { it.toActiveJob() } ?: emptyList()
-            emit(NetworkResult.Success(data = list))
-        }.catch {
-            emit(NetworkResult.Error(it.message.toString()))
-        }.flowOn(Dispatchers.IO)
-    }
-
 }

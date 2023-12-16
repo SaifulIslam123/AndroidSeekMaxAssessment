@@ -45,27 +45,13 @@ object NetworkModule {
 
     @Singleton
     @Provides
-    fun provideRetrofit(gsonBuilder: Gson, okHttpClient: OkHttpClient): Retrofit =
-        Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create(gsonBuilder))
-            .baseUrl("https://api.github.com/")
-            .client(okHttpClient)
-            .build()
-
-    @Singleton
-    @Provides
     fun provideApolloClient(okHttpClient: OkHttpClient): ApolloClient {
         return ApolloClient.Builder()
             .serverUrl("http://172.22.240.1:3002")
-           // .serverUrl("http://192.168.1.6:3002")
+            // .serverUrl("http://192.168.1.6:3002")
             .okHttpClient(okHttpClient)
             .build()
     }
-
-    /*@Provides
-    @Singleton
-    fun provideApiService(retrofit: Retrofit): UserListApiService =
-        retrofit.create(UserListApiService::class.java)*/
 }
 
 class AuthInterceptor(private val preferences: SharedPreferences) :

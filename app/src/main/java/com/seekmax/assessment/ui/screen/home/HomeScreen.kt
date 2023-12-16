@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -30,8 +31,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.seekmax.assessment.ActiveQuery
 import com.seekmax.assessment.R
-import com.seekmax.assessment.model.ActiveJob
+import com.seekmax.assessment.RELOAD_DATA
 import com.seekmax.assessment.repository.NetworkResult
 import com.seekmax.assessment.ui.screen.BottomNavigationScreens
 import com.seekmax.assessment.ui.theme.backgroundSecondary
@@ -42,6 +44,19 @@ import com.seekmax.assessment.ui.theme.textSecondary
 fun HomeScreen(navController: NavController) {
 
     val viewModel: HomeScreenViewModel = hiltViewModel()
+
+    LaunchedEffect(true) {
+        if (navController.currentBackStackEntry!!.savedStateHandle.contains(RELOAD_DATA)) {
+            val reloadData =
+                navController.currentBackStackEntry!!.savedStateHandle.get<Boolean>(
+                    RELOAD_DATA
+                ) ?: false
+            if (reloadData) {
+                viewModel.getActiveJobList()
+            }
+        }
+    }
+
     Scaffold(
         /*topBar = {
         TopAppBar(title = {
@@ -68,7 +83,6 @@ fun HomeScreen(navController: NavController) {
                             }
                         }
                     }
-
                     else -> {
                     }
                 }
@@ -77,7 +91,7 @@ fun HomeScreen(navController: NavController) {
 }
 
 @Composable
-fun JobItemView(navController: NavController, it: ActiveJob) {
+fun JobItemView(navController: NavController, it: ActiveQuery.Job) {
 
 
     Card(
@@ -88,7 +102,7 @@ fun JobItemView(navController: NavController, it: ActiveJob) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                navController.navigate("${BottomNavigationScreens.JobDetail.routePrefix}${it.id}")
+                navController.navigate("${BottomNavigationScreens.JobDetail.routePrefix}${it._id}")
             }, colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.onPrimary
         )

@@ -1,7 +1,5 @@
 package com.seekmax.assessment.ui.screen.profile
 
-import android.content.SharedPreferences
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -21,25 +19,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.seekmax.assessment.USER_TOKEN
 import com.seekmax.assessment.ui.screen.BottomNavigationScreens
 import com.seekmax.assessment.ui.theme.button
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @Composable
 fun ProfileScreen(navController: NavController) {
 
     val viewModel: ProfileViewModel = hiltViewModel()
-    val login by viewModel.loginState.collectAsStateWithLifecycle()
-    if (login == true) ProfileView() else NonLoginView(navController)
+    if (viewModel.isUserLoggedIn()) ProfileView() else NonLoginView(navController)
 }
 
 @Composable
