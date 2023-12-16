@@ -16,7 +16,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.seekmax.assessment.R
+import com.seekmax.assessment.ui.screen.home.HomeScreen
 import com.seekmax.assessment.ui.screen.login.LoginScreen
+import com.seekmax.assessment.ui.screen.profile.ProfileScreen
 import com.seekmax.assessment.ui.theme.textPrimary
 import com.seekmax.assessment.ui.theme.textSecondary
 

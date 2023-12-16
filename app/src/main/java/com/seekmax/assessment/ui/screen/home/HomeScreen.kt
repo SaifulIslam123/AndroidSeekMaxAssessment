@@ -1,6 +1,7 @@
-package com.seekmax.assessment.ui.screen
+package com.seekmax.assessment.ui.screen.home
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -36,6 +39,7 @@ import androidx.navigation.NavController
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.Optional
 import com.seekmax.assessment.ActiveQuery
+import com.seekmax.assessment.R
 import com.seekmax.assessment.model.ActiveJob
 import com.seekmax.assessment.model.toActiveJob
 import com.seekmax.assessment.repository.NetworkResult
@@ -126,9 +130,11 @@ fun JobItemView(it: ActiveJob) {
                     overflow = TextOverflow.Ellipsis
                 )
                 if (it.haveIApplied) {
-                    Icon(
-                        Icons.Default.Lock,
-                        contentDescription = ""
+                    Image(
+                        painterResource(R.drawable.ic_check),
+                        contentDescription = "",
+                        modifier = Modifier.size(20.dp)
+
                     )
                 }
             }
@@ -144,43 +150,6 @@ fun JobItemView(it: ActiveJob) {
                 style = MaterialTheme.typography.bodyLarge
             )
         }
-    }
-
-
-}
-
-@HiltViewModel
-class HomeScreenViewModel @Inject constructor(private val homeRepository: HomeRepository) :
-    ViewModel() {
-
-    val activeJobListState =
-        MutableStateFlow<NetworkResult<List<ActiveJob>>>(NetworkResult.Empty())
-
-    init {
-        getActiveJobList(null)
-    }
-
-    private fun getActiveJobList(search: String?) = viewModelScope.launch {
-        homeRepository.getActiveJobList(search ?: "").collect {
-            activeJobListState.value = it
-        }
-    }
-
-}
-
-class HomeRepository @Inject constructor(private val apolloClient: ApolloClient) {
-
-    fun getActiveJobList(search: String): Flow<NetworkResult<List<ActiveJob>>> {
-
-        return flow {
-            emit(NetworkResult.Loading())
-            val response = apolloClient.query(ActiveQuery(Optional.present(100),Optional.present(1))).execute()
-            val list = response.data?.active?.jobs?.map { it.toActiveJob() } ?: emptyList()
-            Log.d("testjob", "list ${list.size}")
-            emit(NetworkResult.Success(data = list))
-        }.catch {
-            emit(NetworkResult.Error(it.message.toString()))
-        }.flowOn(Dispatchers.IO)
     }
 
 }

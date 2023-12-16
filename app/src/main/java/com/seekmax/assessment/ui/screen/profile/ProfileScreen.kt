@@ -1,4 +1,4 @@
-package com.seekmax.assessment.ui.screen
+package com.seekmax.assessment.ui.screen.profile
 
 import android.content.SharedPreferences
 import android.util.Log
@@ -26,6 +26,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.seekmax.assessment.USER_TOKEN
+import com.seekmax.assessment.ui.screen.BottomNavigationScreens
 import com.seekmax.assessment.ui.theme.button
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -73,23 +74,4 @@ fun NonLoginView(navController: NavController) {
 @Composable
 fun ProfileView() {
     Text(text = "you Login", style = MaterialTheme.typography.h6)
-}
-
-
-@HiltViewModel
-class ProfileViewModel @Inject constructor(private var preferences: SharedPreferences) :
-    ViewModel() {
-
-    init {
-        Log.d("profileTOken:", "${preferences.getString(USER_TOKEN, "")}")
-    }
-
-    val loginState = MutableStateFlow(preferences.getString(USER_TOKEN, "")?.isNotEmpty())
-    fun login() {
-        viewModelScope.launch {
-            delay(3000)
-            preferences.edit().putString(USER_TOKEN, "token").apply()
-            loginState.value = preferences.getString(USER_TOKEN, "")?.isNotEmpty()
-        }
-    }
 }
