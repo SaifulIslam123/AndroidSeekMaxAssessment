@@ -1,5 +1,6 @@
 package com.seekmax.assessment.ui.screen.profile
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,13 +29,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.seekmax.assessment.ComposeMainActivity
+import com.seekmax.assessment.repository.NetworkResult
+import com.seekmax.assessment.ui.ProgressHelper
 import com.seekmax.assessment.ui.screen.BottomNavigationScreens
-import com.seekmax.assessment.ui.screen.login.Credentials
 import com.seekmax.assessment.ui.theme.button
 
 @Composable
@@ -75,10 +78,31 @@ fun NonLoginView(navController: NavController) {
 
 @Composable
 fun ProfileView(viewModel: ProfileViewModel) {
-    var nameState by remember { mutableStateOf("") }
+    var updateNameState by remember { mutableStateOf("") }
     var newPasswordState by remember { mutableStateOf("") }
     var confirmPasswordState by remember { mutableStateOf("") }
+    val userNameSateFlow by viewModel.userNameSateFlow.collectAsStateWithLifecycle()
+    val context = LocalContext.current as ComposeMainActivity
 
+    when (userNameSateFlow) {
+        is NetworkResult.Loading -> {
+            ProgressHelper.showDialog(context, "Please wait...")
+        }
+
+        is NetworkResult.Success -> {
+            ProgressHelper.dismissDialog()
+        }
+
+        is NetworkResult.Error -> {
+            ProgressHelper.dismissDialog()
+        }
+
+        else -> {}
+    }
+
+    fun isValidPassword() =
+        newPasswordState.isNotEmpty() && confirmPasswordState.isNotEmpty() &&
+                newPasswordState.equals(confirmPasswordState)
 
 
     Column(
@@ -105,7 +129,7 @@ fun ProfileView(viewModel: ProfileViewModel) {
                         .size(100.dp)
                         .clip(CircleShape)
                 )
-                Text(text = viewModel.getUserName(), style = MaterialTheme.typography.h6)
+                Text(text = userNameSateFlow.data ?: "", style = MaterialTheme.typography.h6)
             }
 
         }
@@ -118,14 +142,12 @@ fun ProfileView(viewModel: ProfileViewModel) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 10.dp),
-            value = nameState,
-            onValueChange = { nameState = it },
+            value = updateNameState,
+            onValueChange = { updateNameState = it },
             placeholder = { Text(text = "Change your name") })
         Button(
-            onClick = {
-                // viewModel.login(credentialsState.userName, credentialsState.password)
-            },
-            enabled = nameState.isNotEmpty(),
+            onClick = { viewModel.updateUserName(updateNameState) },
+            enabled = updateNameState.isNotEmpty(),
             shape = RoundedCornerShape(5.dp),
             modifier = Modifier
                 .fillMaxWidth()
@@ -144,7 +166,7 @@ fun ProfileView(viewModel: ProfileViewModel) {
                 .fillMaxWidth()
                 .padding(top = 10.dp),
             value = newPasswordState,
-            onValueChange = { confirmPasswordState = it },
+            onValueChange = { newPasswordState = it },
             placeholder = { Text(text = "New password") })
         TextField(
             modifier = Modifier
@@ -157,7 +179,7 @@ fun ProfileView(viewModel: ProfileViewModel) {
             onClick = {
                 // viewModel.login(credentialsState.userName, credentialsState.password)
             },
-            enabled =,
+            enabled = isValidPassword(),
             shape = RoundedCornerShape(5.dp),
             modifier = Modifier
                 .fillMaxWidth()

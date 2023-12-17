@@ -32,4 +32,6 @@ type Query {
 type Mutation {
     auth(username: String!, password: String!): String
     apply(jobId: String!): Boolean!
+    updateUsername(name: String!): Boolean
+    updatePassword(password: String!): Boolean
 }
