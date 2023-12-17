@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.network.http.HttpInfo
 import com.seekmax.assessment.AuthMutation
+import com.seekmax.assessment.USER_NAME
 import com.seekmax.assessment.USER_TOKEN
 import com.seekmax.assessment.repository.NetworkResult
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +27,7 @@ class LoginRepository @Inject constructor(
             val token = response.data?.auth
             if (statusCode == 200 && !token.isNullOrEmpty()) {
                 preferences.edit().putString(USER_TOKEN, token).apply()
+                preferences.edit().putString(USER_NAME, userName).apply()
                 emit(NetworkResult.Success(statusCode, token))
             } else {
                 emit(NetworkResult.Error(token.toString(), code = statusCode))
