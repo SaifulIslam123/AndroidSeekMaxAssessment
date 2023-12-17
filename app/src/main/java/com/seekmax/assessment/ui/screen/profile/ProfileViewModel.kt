@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.ApolloClient
 import com.seekmax.assessment.USER_NAME
 import com.seekmax.assessment.USER_TOKEN
+import com.seekmax.assessment.UpdatePasswordMutation
 import com.seekmax.assessment.UpdateUsernameMutation
 import com.seekmax.assessment.repository.NetworkResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,15 +26,24 @@ class ProfileViewModel @Inject constructor(
 ) : ViewModel() {
 
     var userNameSateFlow = MutableStateFlow<NetworkResult<String>>(
-            NetworkResult.Success(data = preferences.getString(USER_NAME, "") ?: ""))
+        NetworkResult.Success(data = preferences.getString(USER_NAME, "") ?: "")
+    )
+    var passwordSateFlow = MutableStateFlow<NetworkResult<Boolean>>(NetworkResult.Empty())
 
-    fun isUserLoggedIn() = preferences.getString(USER_TOKEN, "")?.isNotEmpty() ?: false
+    var loginSateFlow =
+        MutableStateFlow(preferences.getString(USER_TOKEN, "")?.isNotEmpty() ?: false)
 
     fun updateUserName(name: String) = viewModelScope.launch {
         repository.updateUserName(name).collect {
             userNameSateFlow.value = it
         }
     }
+
+    fun updatePassword(password: String) = viewModelScope.launch {
+        repository.updateUserPassword(password).collect { passwordSateFlow.value = it }
+    }
+
+    fun logout() = preferences.edit().clear().apply()
 
 }
 
@@ -51,6 +61,20 @@ class ProfileRepository @Inject constructor(
                 emit(NetworkResult.Success(data = name))
             } else {
                 emit(NetworkResult.Error(message = "Update name failed"))
+            }
+        }.catch {
+            emit(NetworkResult.Error(it.message.toString()))
+        }.flowOn(Dispatchers.IO)
+    }
+
+    fun updateUserPassword(password: String): Flow<NetworkResult<Boolean>> {
+        return flow {
+            emit(NetworkResult.Loading())
+            val response = apolloClient.mutation(UpdatePasswordMutation(password)).execute()
+            if (response.data?.updatePassword == true) {
+                emit(NetworkResult.Success(data = true))
+            } else {
+                emit(NetworkResult.Error(message = "Update password failed"))
             }
         }.catch {
             emit(NetworkResult.Error(it.message.toString()))

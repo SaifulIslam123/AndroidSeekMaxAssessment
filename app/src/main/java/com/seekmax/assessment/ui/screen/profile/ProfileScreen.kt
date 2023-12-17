@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
@@ -44,7 +46,9 @@ import com.seekmax.assessment.ui.theme.button
 fun ProfileScreen(navController: NavController) {
 
     val viewModel: ProfileViewModel = hiltViewModel()
-    if (viewModel.isUserLoggedIn()) ProfileView(viewModel) else NonLoginView(navController)
+    Log.d("profile", "ProfileScreen: ${viewModel.hashCode()}")
+    val loginStateFlow by viewModel.loginSateFlow.collectAsStateWithLifecycle()
+    if (loginStateFlow) ProfileView(viewModel) else NonLoginView(navController)
 }
 
 @Composable
@@ -82,9 +86,28 @@ fun ProfileView(viewModel: ProfileViewModel) {
     var newPasswordState by remember { mutableStateOf("") }
     var confirmPasswordState by remember { mutableStateOf("") }
     val userNameSateFlow by viewModel.userNameSateFlow.collectAsStateWithLifecycle()
+    val passwordSateFlow by viewModel.passwordSateFlow.collectAsStateWithLifecycle()
     val context = LocalContext.current as ComposeMainActivity
+    val scrollState = rememberScrollState()
+
 
     when (userNameSateFlow) {
+        is NetworkResult.Loading -> {
+            ProgressHelper.showDialog(context, "Please wait...")
+        }
+
+        is NetworkResult.Success -> {
+            ProgressHelper.dismissDialog()
+        }
+
+        is NetworkResult.Error -> {
+            ProgressHelper.dismissDialog()
+        }
+
+        else -> {}
+    }
+
+    when (passwordSateFlow) {
         is NetworkResult.Loading -> {
             ProgressHelper.showDialog(context, "Please wait...")
         }
@@ -109,6 +132,7 @@ fun ProfileView(viewModel: ProfileViewModel) {
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
+            .verticalScroll(scrollState)
     ) {
 
         Box(
@@ -144,7 +168,7 @@ fun ProfileView(viewModel: ProfileViewModel) {
                 .padding(top = 10.dp),
             value = updateNameState,
             onValueChange = { updateNameState = it },
-            placeholder = { Text(text = "Change your name") })
+            placeholder = { Text(text = "Enter Name") })
         Button(
             onClick = { viewModel.updateUserName(updateNameState) },
             enabled = updateNameState.isNotEmpty(),
@@ -167,18 +191,16 @@ fun ProfileView(viewModel: ProfileViewModel) {
                 .padding(top = 10.dp),
             value = newPasswordState,
             onValueChange = { newPasswordState = it },
-            placeholder = { Text(text = "New password") })
+            placeholder = { Text(text = "Enter New password") })
         TextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 10.dp),
             value = confirmPasswordState,
             onValueChange = { confirmPasswordState = it },
-            placeholder = { Text(text = "Confirm password") })
+            placeholder = { Text(text = "Enter Confirm password") })
         Button(
-            onClick = {
-                // viewModel.login(credentialsState.userName, credentialsState.password)
-            },
+            onClick = { viewModel.updatePassword(newPasswordState) },
             enabled = isValidPassword(),
             shape = RoundedCornerShape(5.dp),
             modifier = Modifier
@@ -187,6 +209,21 @@ fun ProfileView(viewModel: ProfileViewModel) {
             colors = ButtonDefaults.buttonColors(containerColor = button)
         ) {
             Text("Change password", color = Color.White)
+        }
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+            Button(
+                onClick = {
+                    viewModel.logout()
+                    viewModel.loginSateFlow.value = false
+                },
+                shape = RoundedCornerShape(5.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 20.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = button)
+            ) {
+                Text("Logout", color = Color.White)
+            }
         }
 
     }
