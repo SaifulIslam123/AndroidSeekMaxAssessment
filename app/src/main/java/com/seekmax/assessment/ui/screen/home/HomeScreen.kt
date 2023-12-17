@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,6 +21,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,9 +33,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.seekmax.assessment.ActiveQuery
 import com.seekmax.assessment.R
 import com.seekmax.assessment.RELOAD_DATA
+import com.seekmax.assessment.fragment.JobInfo
 import com.seekmax.assessment.repository.NetworkResult
 import com.seekmax.assessment.ui.screen.BottomNavigationScreens
 import com.seekmax.assessment.ui.theme.backgroundSecondary
@@ -44,8 +46,13 @@ import com.seekmax.assessment.ui.theme.textSecondary
 fun HomeScreen(navController: NavController) {
 
     val viewModel: HomeScreenViewModel = hiltViewModel()
+    val activeJobList by viewModel.activeJobListState.collectAsStateWithLifecycle()
+    val searchStateFlow by viewModel.searchStateFlow.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) {
+        if (activeJobList is NetworkResult.Empty)
+            viewModel.getActiveJobList()
+
         if (navController.currentBackStackEntry!!.savedStateHandle.contains(RELOAD_DATA)) {
             val reloadData =
                 navController.currentBackStackEntry!!.savedStateHandle.get<Boolean>(
@@ -65,11 +72,14 @@ fun HomeScreen(navController: NavController) {
     }, */content = { padding ->
             Column(
                 modifier = Modifier
-                    .padding(padding)
+                    .fillMaxSize()
                     .background(backgroundSecondary)
+                    .padding(padding)
             ) {
-
-                val activeJobList by viewModel.activeJobListState.collectAsStateWithLifecycle()
+                TextField(
+                    value = searchStateFlow,
+                    onValueChange = { viewModel.searchStateFlow.value = it })
+                Spacer(modifier = Modifier.height(16.dp))
                 when (activeJobList) {
                     is NetworkResult.Success -> {
                         activeJobList.data?.let {
@@ -92,8 +102,7 @@ fun HomeScreen(navController: NavController) {
 }
 
 @Composable
-fun JobItemView(navController: NavController, it: ActiveQuery.Job) {
-
+fun JobItemView(navController: NavController, it: JobInfo) {
 
     Card(
         shape = RoundedCornerShape(5.dp),
