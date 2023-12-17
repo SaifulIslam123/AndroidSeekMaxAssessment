@@ -76,10 +76,15 @@ fun HomeScreen(navController: NavController) {
                     .background(backgroundSecondary)
                     .padding(padding)
             ) {
-                TextField(
-                    value = searchStateFlow,
-                    onValueChange = { viewModel.searchStateFlow.value = it })
                 Spacer(modifier = Modifier.height(16.dp))
+                TextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    value = searchStateFlow,
+                    onValueChange = { viewModel.searchStateFlow.value = it },
+                    placeholder = { Text(text = "Search Job") })
+
                 when (activeJobList) {
                     is NetworkResult.Success -> {
                         activeJobList.data?.let {
@@ -119,7 +124,7 @@ fun JobItemView(navController: NavController, it: JobInfo) {
     ) {
         Column(
             modifier = Modifier
-                .padding(10.dp)
+                .padding(16.dp)
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
