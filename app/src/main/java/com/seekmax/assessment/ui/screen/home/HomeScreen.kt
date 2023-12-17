@@ -83,6 +83,7 @@ fun HomeScreen(navController: NavController) {
                             }
                         }
                     }
+
                     else -> {
                     }
                 }
@@ -131,7 +132,7 @@ fun JobItemView(navController: NavController, it: ActiveQuery.Job) {
                 }
             }
             Text(
-                it.industry.toString(),
+                it.industry,
                 color = textSecondary,
                 style = MaterialTheme.typography.bodyLarge
             )

@@ -8,8 +8,8 @@ type Job {
     positionTitle: String!
     description: String!
     salaryRange: SalaryRange!
-    location: Int!
-    industry: Int!
+    location: String!
+    industry: String!
     haveIApplied: Boolean!
 }
 

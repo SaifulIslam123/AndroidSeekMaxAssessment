@@ -5,9 +5,6 @@ import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.network.http.HttpInfo
 import com.seekmax.assessment.ApplyMutation
 import com.seekmax.assessment.JobQuery
-import com.seekmax.assessment.USER_TOKEN
-import com.seekmax.assessment.model.Job
-import com.seekmax.assessment.model.toJob
 import com.seekmax.assessment.repository.NetworkResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
