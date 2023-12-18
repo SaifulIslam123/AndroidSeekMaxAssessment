@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
-class JobRepository @Inject constructor(private val apolloClient: ApolloClient) {
+class HomeRepository @Inject constructor(private val apolloClient: ApolloClient) {
 
 
     fun getJobList(search: String? = null): Flow<NetworkResult<List<JobInfo>>> =

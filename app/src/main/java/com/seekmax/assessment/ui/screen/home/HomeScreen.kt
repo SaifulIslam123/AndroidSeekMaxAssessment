@@ -26,7 +26,7 @@ import com.seekmax.assessment.ui.theme.backgroundSecondary
 @Composable
 fun HomeScreen(navController: NavController) {
 
-    val viewModel: JobListViewModel = hiltViewModel()
+    val viewModel: HomeViewModel = hiltViewModel()
     val activeJobList by viewModel.activeJobListStateFlow.collectAsStateWithLifecycle()
     val searchStateFlow by viewModel.searchStateFlow.collectAsStateWithLifecycle()
 

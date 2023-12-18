@@ -9,11 +9,10 @@ import androidx.navigation.NavController
 import com.seekmax.assessment.repository.NetworkResult
 import com.seekmax.assessment.ui.component.JobList
 import com.seekmax.assessment.ui.component.NonLoginView
-import com.seekmax.assessment.ui.screen.home.JobListViewModel
 import com.seekmax.assessment.ui.screen.profile.ProfileViewModel
 
 @Composable
-fun MyJobListScreen(navController: NavController) {
+fun MyJobsScreen(navController: NavController) {
 
     val viewModel: ProfileViewModel = hiltViewModel()
     val loginStateFlow by viewModel.loginSateFlow.collectAsStateWithLifecycle()
@@ -22,16 +21,16 @@ fun MyJobListScreen(navController: NavController) {
 
 @Composable
 fun ShowMyJobList(navController: NavController) {
-    val viewModel: JobListViewModel = hiltViewModel()
+    val viewModel: MyJobsViewModel = hiltViewModel()
 
     LaunchedEffect(true) {
-        viewModel.getActiveJobList()
+        viewModel.getMyJobList()
     }
-    val activeJobList by viewModel.activeJobListStateFlow.collectAsStateWithLifecycle()
-    when (activeJobList) {
+    val myJobList by viewModel.myJobListStateFlow.collectAsStateWithLifecycle()
+    when (myJobList) {
         is NetworkResult.Success -> {
-            activeJobList.data?.let {
-                JobList(navController = navController, jobList = it)
+            myJobList.data?.let {
+                JobList(navController = navController, jobList = it, false)
             }
         }
 

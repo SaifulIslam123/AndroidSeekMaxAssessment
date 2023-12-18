@@ -17,7 +17,7 @@ import javax.inject.Inject
 
 @FlowPreview
 @HiltViewModel
-class JobListViewModel @Inject constructor(private val jobRepository: JobRepository) :
+class HomeViewModel @Inject constructor(private val homeRepository: HomeRepository) :
     ViewModel() {
 
     private val TAG = "HomeViewModel"
@@ -31,7 +31,7 @@ class JobListViewModel @Inject constructor(private val jobRepository: JobReposit
         searchStateFlow.debounce(1000)
             .distinctUntilChanged()
             .flatMapLatest {
-                jobRepository.getJobList(it)
+                homeRepository.getJobList(it)
             }.collect {
                 activeJobListStateFlow.value = it
             }
@@ -40,7 +40,7 @@ class JobListViewModel @Inject constructor(private val jobRepository: JobReposit
 
     fun getActiveJobList() = viewModelScope.launch {
 
-        jobRepository.getJobList().collect {
+        homeRepository.getJobList().collect {
             Log.d(TAG, "getActiveJobList ${it}")
             activeJobListStateFlow.value = it
         }

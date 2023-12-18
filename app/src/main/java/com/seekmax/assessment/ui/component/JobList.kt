@@ -32,19 +32,23 @@ import com.seekmax.assessment.ui.theme.textPrimary
 import com.seekmax.assessment.ui.theme.textSecondary
 
 @Composable
-fun JobList(navController: NavController, jobList: List<JobInfo>) {
+fun JobList(
+    navController: NavController,
+    jobList: List<JobInfo>,
+    isShowApplyIcon: Boolean = true
+) {
     LazyColumn(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(jobList) {
-            JobItemView(navController, it)
+            JobItemView(navController, it, isShowApplyIcon)
         }
     }
 }
 
 @Composable
-fun JobItemView(navController: NavController, it: JobInfo) {
+fun JobItemView(navController: NavController, it: JobInfo, isShowApplyIcon: Boolean) {
 
     Card(
         shape = RoundedCornerShape(5.dp),
@@ -73,7 +77,7 @@ fun JobItemView(navController: NavController, it: JobInfo) {
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                if (it.haveIApplied) {
+                if (isShowApplyIcon && it.haveIApplied) {
                     Image(
                         painterResource(R.drawable.ic_check),
                         contentDescription = "",

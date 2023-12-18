@@ -18,7 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import com.seekmax.assessment.ui.screen.home.HomeScreen
 import com.seekmax.assessment.ui.screen.jobdetail.JobDetailScreen
 import com.seekmax.assessment.ui.screen.login.LoginScreen
-import com.seekmax.assessment.ui.screen.myjobs.MyJobListScreen
+import com.seekmax.assessment.ui.screen.myjobs.MyJobsScreen
 import com.seekmax.assessment.ui.screen.profile.ProfileScreen
 import com.seekmax.assessment.ui.theme.textPrimary
 import com.seekmax.assessment.ui.theme.textSecondary
@@ -125,6 +125,6 @@ private fun MainScreenNavigationConfigurations(
                 ) ?: ""
             )
         }
-        composable(BottomNavigationScreens.MyJobList.route) { MyJobListScreen(navController = navController) }
+        composable(BottomNavigationScreens.MyJobList.route) { MyJobsScreen(navController = navController) }
     }
 }
