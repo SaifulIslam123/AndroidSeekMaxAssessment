@@ -92,8 +92,8 @@ fun LoginScreen(navController: NavController) {
 
 @Composable
 fun PerformLogin(navController: NavController, viewModel: LoginViewModel) {
-    val loginState by viewModel.loginState.collectAsStateWithLifecycle()
-    when (loginState) {
+    val loginStateFlow by viewModel.loginStateFlow.collectAsStateWithLifecycle()
+    when (loginStateFlow) {
         is NetworkResult.Success -> {
             navController.navigate(BottomNavigationScreens.Home.route) { popUpTo(0) }
         }

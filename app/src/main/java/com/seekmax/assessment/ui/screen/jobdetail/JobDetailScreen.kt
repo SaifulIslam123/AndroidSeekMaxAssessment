@@ -49,7 +49,7 @@ import com.seekmax.assessment.ui.theme.textPrimary
 fun JobDetailScreen(navController: NavController, jobId: String) {
 
     val viewModel: JobDetailViewModel = hiltViewModel()
-    val jobState by viewModel.jobDetailState.collectAsStateWithLifecycle()
+    val jobDetailStateFlow by viewModel.jobDetailStateFlow.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) {
         viewModel.getJobDetail(jobId)
@@ -58,9 +58,9 @@ fun JobDetailScreen(navController: NavController, jobId: String) {
     Scaffold(content = {
         Surface(modifier = Modifier.padding(it)) {
 
-            when (jobState) {
+            when (jobDetailStateFlow) {
                 is NetworkResult.Success -> {
-                    showJobDetail(navController, jobState.data!!, viewModel)
+                    showJobDetail(navController, jobDetailStateFlow.data!!, viewModel)
                 }
 
                 is NetworkResult.Loading -> ProgressHelper.showDialog(LocalContext.current)
@@ -76,7 +76,7 @@ fun JobDetailScreen(navController: NavController, jobId: String) {
 fun showJobDetail(navController: NavController, job: JobQuery.Job, viewModel: JobDetailViewModel) {
 
     var jobAppliedState by remember { mutableStateOf(job.haveIApplied) }
-    val applyJobState by viewModel.applyJobState.collectAsStateWithLifecycle()
+    val applyJobState by viewModel.applyJobStateFlow.collectAsStateWithLifecycle()
 
     when (applyJobState) {
         is NetworkResult.Success -> {

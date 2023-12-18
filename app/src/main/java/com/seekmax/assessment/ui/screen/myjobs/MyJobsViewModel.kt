@@ -6,6 +6,7 @@ import com.seekmax.assessment.fragment.JobInfo
 import com.seekmax.assessment.repository.NetworkResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -13,11 +14,13 @@ import javax.inject.Inject
 class MyJobsViewModel @Inject constructor(private val repository: MyJobsRepository) :
     ViewModel() {
 
-    var myJobListStateFlow = MutableStateFlow<NetworkResult<List<JobInfo>>>(NetworkResult.Empty())
+    private val _myJobListStateFlow =
+        MutableStateFlow<NetworkResult<List<JobInfo>>>(NetworkResult.Empty())
+    val myJobListStateFlow = _myJobListStateFlow.asStateFlow()
 
     fun getMyJobList() = viewModelScope.launch {
         repository.getMyApplyJobList().collect {
-            myJobListStateFlow.value = it
+            _myJobListStateFlow.value = it
         }
     }
 

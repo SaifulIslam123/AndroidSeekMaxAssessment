@@ -8,6 +8,7 @@ import com.seekmax.assessment.USER_TOKEN
 import com.seekmax.assessment.repository.NetworkResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -17,22 +18,25 @@ class ProfileViewModel @Inject constructor(
     private val repository: ProfileRepository
 ) : ViewModel() {
 
-    var userNameSateFlow = MutableStateFlow<NetworkResult<String>>(
+    private val _userNameSateFlow = MutableStateFlow<NetworkResult<String>>(
         NetworkResult.Success(data = preferences.getString(USER_NAME, "") ?: "")
     )
-    var passwordSateFlow = MutableStateFlow<NetworkResult<Boolean>>(NetworkResult.Empty())
+    val userNameSateFlow = _userNameSateFlow.asStateFlow()
 
-    var loginSateFlow =
+    private val _passwordSateFlow = MutableStateFlow<NetworkResult<Boolean>>(NetworkResult.Empty())
+    val passwordSateFlow = _passwordSateFlow.asStateFlow()
+
+    val loginSateFlow =
         MutableStateFlow(preferences.getString(USER_TOKEN, "")?.isNotEmpty() ?: false)
 
     fun updateUserName(name: String) = viewModelScope.launch {
         repository.updateUserName(name).collect {
-            userNameSateFlow.value = it
+            _userNameSateFlow.value = it
         }
     }
 
     fun updatePassword(password: String) = viewModelScope.launch {
-        repository.updateUserPassword(password).collect { passwordSateFlow.value = it }
+        repository.updateUserPassword(password).collect { _passwordSateFlow.value = it }
     }
 
     fun logout() = preferences.edit().clear().apply()

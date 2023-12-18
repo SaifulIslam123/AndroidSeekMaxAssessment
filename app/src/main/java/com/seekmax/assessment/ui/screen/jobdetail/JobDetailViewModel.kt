@@ -8,6 +8,7 @@ import com.seekmax.assessment.USER_TOKEN
 import com.seekmax.assessment.repository.NetworkResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -17,20 +18,23 @@ class JobDetailViewModel @Inject constructor(
     val repository: JobDetailRepository
 ) : ViewModel() {
 
-    val jobDetailState = MutableStateFlow<NetworkResult<JobQuery.Job>>(NetworkResult.Empty())
-    val applyJobState = MutableStateFlow<NetworkResult<Boolean>>(NetworkResult.Empty())
+    private val _jobDetailStateFlow =
+        MutableStateFlow<NetworkResult<JobQuery.Job>>(NetworkResult.Empty())
+    val jobDetailStateFlow = _jobDetailStateFlow.asStateFlow()
+    private val _applyJobStateFlow = MutableStateFlow<NetworkResult<Boolean>>(NetworkResult.Empty())
+    val applyJobStateFlow = _applyJobStateFlow.asStateFlow()
 
     fun getJobDetail(id: String) = viewModelScope.launch {
         repository.getJobDetail(id).collect {
-            jobDetailState.value = it
+            _jobDetailStateFlow.value = it
         }
     }
 
     fun isUserLoggedIn() = preferences.getString(USER_TOKEN, "")?.isNotEmpty() ?: false
 
     fun applyJob(id: String) = viewModelScope.launch {
-        repository.applyJob(id).collect{
-            applyJobState.value = it
+        repository.applyJob(id).collect {
+            _applyJobStateFlow.value = it
         }
     }
 

@@ -8,6 +8,7 @@ import com.seekmax.assessment.repository.NetworkResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -22,8 +23,9 @@ class HomeViewModel @Inject constructor(private val homeRepository: HomeReposito
 
     private val TAG = "HomeViewModel"
 
-    val activeJobListStateFlow =
+    private val _activeJobListStateFlow =
         MutableStateFlow<NetworkResult<List<JobInfo>>>(NetworkResult.Empty())
+    val activeJobListStateFlow = _activeJobListStateFlow.asStateFlow()
 
     val searchStateFlow = MutableStateFlow("")
 
@@ -33,7 +35,7 @@ class HomeViewModel @Inject constructor(private val homeRepository: HomeReposito
             .flatMapLatest {
                 homeRepository.getJobList(it)
             }.collect {
-                activeJobListStateFlow.value = it
+                _activeJobListStateFlow.value = it
             }
     }
 
@@ -42,7 +44,7 @@ class HomeViewModel @Inject constructor(private val homeRepository: HomeReposito
 
         homeRepository.getJobList().collect {
             Log.d(TAG, "getActiveJobList ${it}")
-            activeJobListStateFlow.value = it
+            _activeJobListStateFlow.value = it
         }
     }
 
