@@ -46,22 +46,17 @@ fun HomeScreen(navController: NavController) {
     }
 
     Scaffold(
-        /*topBar = {
-        TopAppBar(title = {
-            Text(text = "Users")
-        })
-    }, */content = { padding ->
+        content = { padding ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(backgroundSecondary)
                     .padding(padding)
             ) {
-                Spacer(modifier = Modifier.height(16.dp))
                 TextField(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(top = 40.dp, start = 16.dp, end = 16.dp, bottom = 16.dp),
                     value = searchStateFlow,
                     onValueChange = { viewModel.searchStateFlow.value = it },
                     placeholder = { Text(text = "Search Job") })

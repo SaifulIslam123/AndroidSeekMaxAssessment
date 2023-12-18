@@ -86,7 +86,7 @@ fun LoginScreen(navController: NavController) {
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = button)
             ) {
-                Text("Login", color = Color.White)
+                Text("LOGIN", color = Color.White)
             }
         }
     }

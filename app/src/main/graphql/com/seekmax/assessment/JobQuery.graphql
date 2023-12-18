@@ -10,5 +10,8 @@ query Job($jobId: String!) {
             max
             min
         }
+        company {
+            name
+        }
     }
 }

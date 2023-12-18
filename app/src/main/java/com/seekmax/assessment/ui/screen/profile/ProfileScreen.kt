@@ -45,7 +45,7 @@ fun ProfileScreen(navController: NavController) {
 
     val viewModel: ProfileViewModel = hiltViewModel()
     val loginStateFlow by viewModel.loginSateFlow.collectAsStateWithLifecycle()
-    if (loginStateFlow) ProfileView(navController,viewModel) else NonLoginView(navController)
+    if (loginStateFlow) ProfileView(navController, viewModel) else NonLoginView(navController)
 }
 
 @Composable
@@ -140,7 +140,7 @@ fun ProfileView(navController: NavController, viewModel: ProfileViewModel) {
 
         }
         Text(
-            text = "Change Name",
+            text = "Update Name",
             modifier = Modifier.padding(top = 20.dp),
             style = MaterialTheme.typography.h6
         )
@@ -160,10 +160,10 @@ fun ProfileView(navController: NavController, viewModel: ProfileViewModel) {
                 .padding(top = 16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = button)
         ) {
-            Text("Change Name", color = Color.White)
+            Text("UPDATE NAME", color = Color.White)
         }
         Text(
-            text = "Change password",
+            text = "Update password",
             modifier = Modifier.padding(top = 30.dp),
             style = MaterialTheme.typography.h6
         )
@@ -190,7 +190,7 @@ fun ProfileView(navController: NavController, viewModel: ProfileViewModel) {
                 .padding(top = 16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = button)
         ) {
-            Text("Change password", color = Color.White)
+            Text("UPDATE PASSWORD", color = Color.White)
         }
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             Button(
@@ -207,7 +207,7 @@ fun ProfileView(navController: NavController, viewModel: ProfileViewModel) {
                     .padding(top = 20.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = button)
             ) {
-                Text("Logout", color = Color.White)
+                Text("LOGOUT", color = Color.Red)
             }
         }
 

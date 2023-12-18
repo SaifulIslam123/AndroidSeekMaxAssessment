@@ -15,6 +15,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.seekmax.assessment.JOB_DETAIL
+import com.seekmax.assessment.JOB_ID
 import com.seekmax.assessment.ui.screen.home.HomeScreen
 import com.seekmax.assessment.ui.screen.jobdetail.JobDetailScreen
 import com.seekmax.assessment.ui.screen.login.LoginScreen
@@ -25,21 +27,20 @@ import com.seekmax.assessment.ui.theme.textSecondary
 
 
 sealed class BottomNavigationScreens(
-    val routePrefix: String = "",
     val route: String,
-    val name: String
+    val name: String? = null
 ) {
     object Home :
-        BottomNavigationScreens(route = "home", name = "Home")
+        BottomNavigationScreens(route = "home", name = "HOME")
 
     object Profile :
-        BottomNavigationScreens(route = "profile", name = "Profile")
+        BottomNavigationScreens(route = "profile", name = "PROFILE")
 
     object Login : BottomNavigationScreens(route = "login", name = "Login")
     object JobDetail :
-        BottomNavigationScreens("jobdetail/", "jobdetail/{jobId}", name = "Job Detail")
+        BottomNavigationScreens("$JOB_DETAIL/{$JOB_ID}")
 
-    object MyJobList : BottomNavigationScreens(route = "myjoblist", name = "My Job")
+    object MyJobList : BottomNavigationScreens(route = "myjoblist", name = "MY JOBS")
 
 }
 
@@ -54,19 +55,13 @@ private fun AppBottomNavigation(
         items.forEach { screen ->
             BottomNavigationItem(
                 icon = { },
-                label = { Text(screen.name) },
+                label = { Text(screen.name.toString()) },
                 selectedContentColor = Color.White,
                 unselectedContentColor = textSecondary,
                 alwaysShowLabel = true,
                 selected = currentRoute == screen.route,
                 onClick = {
-                    // This if check gives us a "singleTop" behavior where we do not create a
-                    // second instance of the composable if we are already on that destination
-                    /*if (currentRoute != screen.route) {
-                        navController.navigate(screen.route)
-                    }*/
                     navController.navigate(screen.route) {
-
                         navController.graph.startDestinationRoute?.let { screen_route ->
                             popUpTo(screen_route) {
                                 saveState = true
@@ -92,8 +87,8 @@ private fun currentRoute(navController: NavHostController): String? {
 fun MainScreen() {
     val bottomNavigationItems = listOf(
         BottomNavigationScreens.Home,
-        BottomNavigationScreens.Profile,
-        BottomNavigationScreens.MyJobList
+        BottomNavigationScreens.MyJobList,
+        BottomNavigationScreens.Profile
     )
     val navController = rememberNavController()
 
@@ -121,7 +116,7 @@ private fun MainScreenNavigationConfigurations(
             JobDetailScreen(
                 navController = navController,
                 jobId = backStackEntry.arguments?.getString(
-                    "jobId"/*BottomNavigationScreens.JobDetail.name*/, ""
+                    JOB_ID, ""
                 ) ?: ""
             )
         }

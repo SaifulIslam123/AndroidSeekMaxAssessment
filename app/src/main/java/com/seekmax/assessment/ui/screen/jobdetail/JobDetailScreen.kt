@@ -5,12 +5,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -105,12 +106,15 @@ fun ShowJobDetail(navController: NavController, job: JobQuery.Job, viewModel: Jo
                         .fillMaxSize()
                         .padding(16.dp)
                 ) {
-                    Spacer(modifier = Modifier.height(50.dp))
-                    Row(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 70.dp)
+                    ) {
                         Text(
-                            job._id,
+                            job.positionTitle,
                             color = textPrimary,
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.weight(1f),
                             maxLines = 1,
@@ -124,52 +128,73 @@ fun ShowJobDetail(navController: NavController, job: JobQuery.Job, viewModel: Jo
                             )
                         }
                     }
-                    Text(
-                        "Company Name: ${job.industry}",
-                        color = textPrimary,
-                        style = MaterialTheme.typography.bodyLarge
+                    Spacer(modifier = Modifier.size(20.dp))
+                    TextWithLeftImage(R.drawable.ic_check, "Company Name: ${job.company.name}")
+                    TextWithLeftImage(R.drawable.ic_check, "Location: ${job.location}")
+                    TextWithLeftImage(
+                        R.drawable.ic_check,
+                        "Salary: ${job.salaryRange.min} - ${job.salaryRange.max}"
                     )
-                    Text(
-                        "Location: ${job.location}",
-                        color = textPrimary,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Text(
-                        "Salary: ${job.salaryRange.min} - ${job.salaryRange.max}",
-                        color = textPrimary,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Text(
-                        job.description,
-                        color = textPrimary,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    if (!jobAppliedState) {
-                        Spacer(modifier = Modifier.height(50.dp))
+                    TextWithLeftImage(R.drawable.ic_check, job.description)
+                    //if (!jobAppliedState) {
                         Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.Center
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.BottomCenter
                         ) {
                             Button(
                                 onClick = {
-                                    if (viewModel.isUserLoggedIn()) {
-                                        viewModel.applyJob(job._id)
-                                    } else {
-                                        navController.navigate(BottomNavigationScreens.Profile.route)
+                                    if(!jobAppliedState){
+                                        if (viewModel.isUserLoggedIn()) {
+                                            viewModel.applyJob(job._id)
+                                        } else {
+                                            navController.navigate(BottomNavigationScreens.Profile.route)
+                                        }
                                     }
+
                                 },
                                 shape = RoundedCornerShape(5.dp),
                                 modifier = Modifier
-                                    .height(40.dp)
-                                    .width(100.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = button)
+                                    .height(50.dp)
+                                    .fillMaxWidth(),
+                                colors = if (jobAppliedState) ButtonDefaults.buttonColors(
+                                    containerColor = Color.LightGray
+                                ) else ButtonDefaults.buttonColors(containerColor = button)
                             ) {
-                                Text("Apply", color = Color.White)
+                                if (jobAppliedState)
+                                    Text("ALREADY APPLIED", color = Color.DarkGray)
+                                else
+                                    Text("APPLY", color = Color.White)
                             }
                         }
-                    }
+                   // }
                 }
             }
         }
     )
+}
+
+@Composable
+fun TextWithLeftImage(icon: Int, text: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp)
+    ) {
+        // Left-aligned image
+        Image(
+            painter = painterResource(id = icon),
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(Color.DarkGray),
+            modifier = Modifier
+                .size(24.dp)
+        )
+
+        Text(
+            text,
+            color = textPrimary,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(start = 12.dp)
+        )
+
+    }
 }

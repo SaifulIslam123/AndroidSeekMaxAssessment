@@ -3,6 +3,11 @@ type SalaryRange {
     max: Int!
 }
 
+type Company {
+    _id: String!
+    name: String!
+}
+
 type Job {
     _id: String!
     positionTitle: String!
@@ -11,6 +16,7 @@ type Job {
     location: String!
     industry: String!
     haveIApplied: Boolean!
+    company: Company!
 }
 
 type GetJobsResponse{

@@ -1,7 +1,11 @@
 package com.seekmax.assessment.ui.screen.home
 
+import android.app.appsearch.exceptions.AppSearchException
 import com.apollographql.apollo3.ApolloClient
+import com.apollographql.apollo3.api.ApolloResponse
+import com.apollographql.apollo3.api.Error
 import com.apollographql.apollo3.api.Optional
+import com.apollographql.apollo3.exception.ApolloException
 import com.seekmax.assessment.ActiveQuery
 import com.seekmax.assessment.SearchQuery
 import com.seekmax.assessment.fragment.JobInfo
@@ -23,17 +27,26 @@ class HomeRepository @Inject constructor(private val apolloClient: ApolloClient)
 
         return flow {
             emit(NetworkResult.Loading())
-            val response = apolloClient.query(
-                ActiveQuery(
-                    Optional.present(100),
-                    Optional.present(1)
-                )
-            ).execute()
-            val jobInfoList = ArrayList<JobInfo>()
-            response.data?.active?.jobs?.forEach {
-                jobInfoList.add(it.jobInfo)
+            try {
+                val response = apolloClient.query(
+                    ActiveQuery(
+                        Optional.present(100),
+                        Optional.present(1)
+                    )
+                ).execute()
+                val jobInfoList = ArrayList<JobInfo>()
+                response.data?.active?.jobs?.forEach {
+                    jobInfoList.add(it.jobInfo)
+                    emit(NetworkResult.Success(data = jobInfoList.toList()))
+                } ?: run {
+                    response.errors?.let {
+                        if (it.isNotEmpty()) emit(NetworkResult.Error(it[0].message))
+                    }
+                }
+            } catch (e: ApolloException) {
+                emit(NetworkResult.Error(e.message.toString()))
             }
-            emit(NetworkResult.Success(data = jobInfoList.toList()))
+
         }.catch {
             emit(NetworkResult.Error(it.message.toString()))
         }.flowOn(Dispatchers.IO)
@@ -61,5 +74,5 @@ class HomeRepository @Inject constructor(private val apolloClient: ApolloClient)
         }.flowOn(Dispatchers.IO)
 
     }
-
 }
+

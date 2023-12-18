@@ -4,4 +4,7 @@ fragment JobInfo on Job{
     description
     industry
     haveIApplied
+    company {
+        name
+    }
 }

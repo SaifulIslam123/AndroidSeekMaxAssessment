@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.seekmax.assessment.JOB_DETAIL
 import com.seekmax.assessment.R
 import com.seekmax.assessment.fragment.JobInfo
 import com.seekmax.assessment.ui.screen.BottomNavigationScreens
@@ -58,7 +59,7 @@ fun JobItemView(navController: NavController, it: JobInfo, isShowApplyIcon: Bool
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                navController.navigate("${BottomNavigationScreens.JobDetail.routePrefix}${it._id}")
+                navController.navigate("$JOB_DETAIL/${it._id}")
             }, colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.onPrimary
         )
@@ -71,7 +72,7 @@ fun JobItemView(navController: NavController, it: JobInfo, isShowApplyIcon: Bool
                 Text(
                     it.positionTitle,
                     color = textPrimary,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f),
                     maxLines = 1,
