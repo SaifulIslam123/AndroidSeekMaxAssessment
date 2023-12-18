@@ -39,6 +39,7 @@ import androidx.navigation.NavController
 import com.seekmax.assessment.ComposeMainActivity
 import com.seekmax.assessment.repository.NetworkResult
 import com.seekmax.assessment.ui.ProgressHelper
+import com.seekmax.assessment.ui.component.NonLoginView
 import com.seekmax.assessment.ui.screen.BottomNavigationScreens
 import com.seekmax.assessment.ui.theme.button
 
@@ -48,35 +49,6 @@ fun ProfileScreen(navController: NavController) {
     val viewModel: ProfileViewModel = hiltViewModel()
     val loginStateFlow by viewModel.loginSateFlow.collectAsStateWithLifecycle()
     if (loginStateFlow) ProfileView(viewModel) else NonLoginView(navController)
-}
-
-@Composable
-fun NonLoginView(navController: NavController) {
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 30.dp)
-    ) {
-        Text(text = "Be seen with a Jobstreet profile", style = MaterialTheme.typography.button)
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            text = "Receive job opportunities, manage your resumes and apply for roles faster",
-            style = MaterialTheme.typography.body1
-        )
-        Spacer(modifier = Modifier.height(30.dp))
-        Button(
-            onClick = {
-                navController.navigate(BottomNavigationScreens.Login.route)
-            },
-            shape = RoundedCornerShape(5.dp),
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = button)
-        ) {
-            Text("Login", color = Color.White)
-        }
-    }
 }
 
 @Composable

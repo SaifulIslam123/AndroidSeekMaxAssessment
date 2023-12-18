@@ -3,7 +3,6 @@ package com.seekmax.assessment.ui.screen.home
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.Optional
 import com.seekmax.assessment.ActiveQuery
-import com.seekmax.assessment.JobQuery
 import com.seekmax.assessment.SearchQuery
 import com.seekmax.assessment.fragment.JobInfo
 import com.seekmax.assessment.repository.NetworkResult
@@ -14,7 +13,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
-class HomeRepository @Inject constructor(private val apolloClient: ApolloClient) {
+class JobRepository @Inject constructor(private val apolloClient: ApolloClient) {
 
 
     fun getJobList(search: String? = null): Flow<NetworkResult<List<JobInfo>>> =

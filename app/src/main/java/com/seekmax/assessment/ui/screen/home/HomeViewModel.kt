@@ -17,12 +17,12 @@ import javax.inject.Inject
 
 @FlowPreview
 @HiltViewModel
-class HomeScreenViewModel @Inject constructor(private val homeRepository: HomeRepository) :
+class JobListViewModel @Inject constructor(private val jobRepository: JobRepository) :
     ViewModel() {
 
     private val TAG = "HomeViewModel"
 
-    val activeJobListState =
+    val activeJobListStateFlow =
         MutableStateFlow<NetworkResult<List<JobInfo>>>(NetworkResult.Empty())
 
     val searchStateFlow = MutableStateFlow("")
@@ -31,18 +31,18 @@ class HomeScreenViewModel @Inject constructor(private val homeRepository: HomeRe
         searchStateFlow.debounce(1000)
             .distinctUntilChanged()
             .flatMapLatest {
-                homeRepository.getJobList(it)
+                jobRepository.getJobList(it)
             }.collect {
-                activeJobListState.value = it
+                activeJobListStateFlow.value = it
             }
     }
 
 
     fun getActiveJobList() = viewModelScope.launch {
 
-        homeRepository.getJobList().collect {
+        jobRepository.getJobList().collect {
             Log.d(TAG, "getActiveJobList ${it}")
-            activeJobListState.value = it
+            activeJobListStateFlow.value = it
         }
     }
 

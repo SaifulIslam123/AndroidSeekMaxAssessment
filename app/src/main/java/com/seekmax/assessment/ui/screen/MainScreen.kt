@@ -15,10 +15,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.seekmax.assessment.R
 import com.seekmax.assessment.ui.screen.home.HomeScreen
 import com.seekmax.assessment.ui.screen.jobdetail.JobDetailScreen
 import com.seekmax.assessment.ui.screen.login.LoginScreen
+import com.seekmax.assessment.ui.screen.myjobs.MyJobListScreen
 import com.seekmax.assessment.ui.screen.profile.ProfileScreen
 import com.seekmax.assessment.ui.theme.textPrimary
 import com.seekmax.assessment.ui.theme.textSecondary
@@ -36,9 +36,11 @@ sealed class BottomNavigationScreens(
         BottomNavigationScreens(route = "profile", name = "Profile")
 
     object Login : BottomNavigationScreens(route = "login", name = "Login")
-
     object JobDetail :
         BottomNavigationScreens("jobdetail/", "jobdetail/{jobId}", name = "Job Detail")
+
+    object MyJobList : BottomNavigationScreens(route = "myjoblist", name = "My Job")
+
 }
 
 @Composable
@@ -90,7 +92,8 @@ private fun currentRoute(navController: NavHostController): String? {
 fun MainScreen() {
     val bottomNavigationItems = listOf(
         BottomNavigationScreens.Home,
-        BottomNavigationScreens.Profile
+        BottomNavigationScreens.Profile,
+        BottomNavigationScreens.MyJobList
     )
     val navController = rememberNavController()
 
@@ -122,6 +125,6 @@ private fun MainScreenNavigationConfigurations(
                 ) ?: ""
             )
         }
-
+        composable(BottomNavigationScreens.MyJobList.route) { MyJobListScreen(navController = navController) }
     }
 }
