@@ -46,7 +46,6 @@ import com.seekmax.assessment.ui.theme.button
 fun ProfileScreen(navController: NavController) {
 
     val viewModel: ProfileViewModel = hiltViewModel()
-    Log.d("profile", "ProfileScreen: ${viewModel.hashCode()}")
     val loginStateFlow by viewModel.loginSateFlow.collectAsStateWithLifecycle()
     if (loginStateFlow) ProfileView(viewModel) else NonLoginView(navController)
 }

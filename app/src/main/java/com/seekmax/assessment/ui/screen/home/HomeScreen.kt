@@ -51,9 +51,9 @@ fun HomeScreen(navController: NavController) {
     val searchStateFlow by viewModel.searchStateFlow.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) {
-        if (activeJobList is NetworkResult.Empty)
+        /*if (activeJobList is NetworkResult.Empty)
             viewModel.getActiveJobList()
-
+*/
         if (navController.currentBackStackEntry!!.savedStateHandle.contains(RELOAD_DATA)) {
             val reloadData =
                 navController.currentBackStackEntry!!.savedStateHandle.get<Boolean>(
