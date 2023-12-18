@@ -1,5 +1,6 @@
 package com.seekmax.assessment.ui.screen.login
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +25,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -92,16 +94,30 @@ fun LoginScreen(navController: NavController) {
 
 @Composable
 fun PerformLogin(navController: NavController, viewModel: LoginViewModel) {
-    val loginStateFlow by viewModel.loginStateFlow.collectAsStateWithLifecycle()
-    when (loginStateFlow) {
-        is NetworkResult.Success -> {
-            navController.navigate(BottomNavigationScreens.Home.route) { popUpTo(0) }
-        }
+    val context = LocalContext.current
+    LaunchedEffect(viewModel.loginSharedFlow) {
+        viewModel.loginSharedFlow.collect {
+            when (it) {
+                is NetworkResult.Success -> {
+                    ProgressHelper.dismissDialog()
+                    navController.navigate(BottomNavigationScreens.Home.route) { popUpTo(0) }
+                }
 
-        is NetworkResult.Loading -> ProgressHelper.showDialog(LocalContext.current)
-        is NetworkResult.Error -> ProgressHelper.dismissDialog()
-        else -> {}
+                is NetworkResult.Loading -> {
+                    ProgressHelper.showDialog(context)
+                }
+
+                is NetworkResult.Error -> {
+                    Toast.makeText(context, "Error occurred", Toast.LENGTH_LONG).show()
+                    ProgressHelper.dismissDialog()
+                }
+
+                else -> {}
+            }
+        }
     }
+
+
 }
 
 data class Credentials(

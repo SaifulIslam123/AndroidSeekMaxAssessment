@@ -1,6 +1,5 @@
 package com.seekmax.assessment.ui.screen.home
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -20,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.seekmax.assessment.ComposeMainActivity
 import com.seekmax.assessment.RELOAD_DATA
 import com.seekmax.assessment.repository.NetworkResult
 import com.seekmax.assessment.ui.ProgressHelper
@@ -42,6 +40,7 @@ fun HomeScreen(navController: NavController) {
                 ) ?: false
             if (reloadData) {
                 viewModel.getActiveJobList()
+                navController.currentBackStackEntry?.savedStateHandle?.remove<Boolean>(RELOAD_DATA)
             }
         }
     }

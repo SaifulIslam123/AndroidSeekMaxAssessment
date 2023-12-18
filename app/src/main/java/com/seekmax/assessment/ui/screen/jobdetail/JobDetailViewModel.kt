@@ -7,7 +7,9 @@ import com.seekmax.assessment.JobQuery
 import com.seekmax.assessment.USER_TOKEN
 import com.seekmax.assessment.repository.NetworkResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,8 +23,8 @@ class JobDetailViewModel @Inject constructor(
     private val _jobDetailStateFlow =
         MutableStateFlow<NetworkResult<JobQuery.Job>>(NetworkResult.Empty())
     val jobDetailStateFlow = _jobDetailStateFlow.asStateFlow()
-    private val _applyJobStateFlow = MutableStateFlow<NetworkResult<Boolean>>(NetworkResult.Empty())
-    val applyJobStateFlow = _applyJobStateFlow.asStateFlow()
+    private val _applyJobSharedFlow = MutableSharedFlow<NetworkResult<Boolean>>()
+    val applyJobSharedFlow = _applyJobSharedFlow.asSharedFlow()
 
     fun getJobDetail(id: String) = viewModelScope.launch {
         repository.getJobDetail(id).collect {
@@ -34,7 +36,7 @@ class JobDetailViewModel @Inject constructor(
 
     fun applyJob(id: String) = viewModelScope.launch {
         repository.applyJob(id).collect {
-            _applyJobStateFlow.value = it
+            _applyJobSharedFlow.emit(it)
         }
     }
 

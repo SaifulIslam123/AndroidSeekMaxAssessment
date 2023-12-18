@@ -1,6 +1,6 @@
 package com.seekmax.assessment.ui.screen.profile
 
-import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.seekmax.assessment.ComposeMainActivity
+import com.seekmax.assessment.RELOAD_DATA
 import com.seekmax.assessment.repository.NetworkResult
 import com.seekmax.assessment.ui.ProgressHelper
 import com.seekmax.assessment.ui.component.NonLoginView
@@ -44,55 +45,70 @@ fun ProfileScreen(navController: NavController) {
 
     val viewModel: ProfileViewModel = hiltViewModel()
     val loginStateFlow by viewModel.loginSateFlow.collectAsStateWithLifecycle()
-    if (loginStateFlow) ProfileView(viewModel) else NonLoginView(navController)
+    if (loginStateFlow) ProfileView(navController,viewModel) else NonLoginView(navController)
 }
 
 @Composable
-fun ProfileView(viewModel: ProfileViewModel) {
+fun ProfileView(navController: NavController, viewModel: ProfileViewModel) {
+
+    var displayNameState by remember { mutableStateOf(viewModel.presentUserName()) }
     var updateNameState by remember { mutableStateOf("") }
     var newPasswordState by remember { mutableStateOf("") }
     var confirmPasswordState by remember { mutableStateOf("") }
-    val userNameSateFlow by viewModel.userNameSateFlow.collectAsStateWithLifecycle()
-    val passwordSateFlow by viewModel.passwordSateFlow.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
+    val context = LocalContext.current
 
+    LaunchedEffect(viewModel.userNameSateFlow) {
+        viewModel.userNameSateFlow.collect {
+            when (it) {
+                is NetworkResult.Loading -> {
+                    ProgressHelper.showDialog(context)
+                }
 
-    when (userNameSateFlow) {
-        is NetworkResult.Loading -> {
-            ProgressHelper.showDialog(LocalContext.current)
+                is NetworkResult.Success -> {
+                    ProgressHelper.dismissDialog()
+                    Toast.makeText(
+                        context,
+                        "User name update successful",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    displayNameState = it.data.toString()
+                }
+
+                is NetworkResult.Error -> {
+                    ProgressHelper.dismissDialog()
+                }
+
+                else -> {}
+            }
         }
-
-        is NetworkResult.Success -> {
-            ProgressHelper.dismissDialog()
-        }
-
-        is NetworkResult.Error -> {
-            ProgressHelper.dismissDialog()
-        }
-
-        else -> {}
     }
 
-    when (passwordSateFlow) {
-        is NetworkResult.Loading -> {
-            ProgressHelper.showDialog(LocalContext.current)
-        }
+    LaunchedEffect(viewModel.passwordSharedFlow) {
+        viewModel.passwordSharedFlow.collect {
+            when (it) {
+                is NetworkResult.Loading -> {
+                    ProgressHelper.showDialog(context)
+                }
 
-        is NetworkResult.Success -> {
-            ProgressHelper.dismissDialog()
-        }
+                is NetworkResult.Success -> {
+                    ProgressHelper.dismissDialog()
+                    Toast.makeText(context, "Password change successful", Toast.LENGTH_LONG)
+                        .show()
+                }
 
-        is NetworkResult.Error -> {
-            ProgressHelper.dismissDialog()
-        }
+                is NetworkResult.Error -> {
+                    ProgressHelper.dismissDialog()
+                }
 
-        else -> {}
+                else -> {}
+            }
+        }
     }
 
     fun isValidPassword() =
         newPasswordState.isNotEmpty() && confirmPasswordState.isNotEmpty() &&
                 newPasswordState.equals(confirmPasswordState)
-
 
     Column(
         modifier = Modifier
@@ -119,7 +135,7 @@ fun ProfileView(viewModel: ProfileViewModel) {
                         .size(100.dp)
                         .clip(CircleShape)
                 )
-                Text(text = userNameSateFlow.data ?: "", style = MaterialTheme.typography.h6)
+                Text(text = displayNameState, style = MaterialTheme.typography.h6)
             }
 
         }
@@ -180,6 +196,9 @@ fun ProfileView(viewModel: ProfileViewModel) {
             Button(
                 onClick = {
                     viewModel.logout()
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set(RELOAD_DATA, true)
                     viewModel.loginSateFlow.value = false
                 },
                 shape = RoundedCornerShape(5.dp),

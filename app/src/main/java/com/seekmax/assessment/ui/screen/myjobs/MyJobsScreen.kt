@@ -16,14 +16,17 @@ import com.seekmax.assessment.ui.screen.profile.ProfileViewModel
 @Composable
 fun MyJobsScreen(navController: NavController) {
 
-    val viewModel: ProfileViewModel = hiltViewModel()
-    val loginStateFlow by viewModel.loginSateFlow.collectAsStateWithLifecycle()
-    if (loginStateFlow) ShowMyJobList(navController) else NonLoginView(navController)
+    val viewModel: MyJobsViewModel = hiltViewModel()
+
+    /*val viewModel: ProfileViewModel = hiltViewModel()
+    val loginStateFlow by viewModel.loginSateFlow.collectAsStateWithLifecycle()*/
+    if (viewModel.isUserLoggedIn()) ShowMyJobList(navController, viewModel) else NonLoginView(
+        navController
+    )
 }
 
 @Composable
-fun ShowMyJobList(navController: NavController) {
-    val viewModel: MyJobsViewModel = hiltViewModel()
+fun ShowMyJobList(navController: NavController, viewModel: MyJobsViewModel) {
 
     LaunchedEffect(true) {
         viewModel.getMyJobList()
@@ -31,6 +34,7 @@ fun ShowMyJobList(navController: NavController) {
     val myJobList by viewModel.myJobListStateFlow.collectAsStateWithLifecycle()
     when (myJobList) {
         is NetworkResult.Success -> {
+            ProgressHelper.dismissDialog()
             myJobList.data?.let {
                 JobList(navController = navController, jobList = it, false)
             }

@@ -60,7 +60,8 @@ fun JobDetailScreen(navController: NavController, jobId: String) {
 
             when (jobDetailStateFlow) {
                 is NetworkResult.Success -> {
-                    showJobDetail(navController, jobDetailStateFlow.data!!, viewModel)
+                    ProgressHelper.dismissDialog()
+                    ShowJobDetail(navController, jobDetailStateFlow.data!!, viewModel)
                 }
 
                 is NetworkResult.Loading -> ProgressHelper.showDialog(LocalContext.current)
@@ -73,22 +74,27 @@ fun JobDetailScreen(navController: NavController, jobId: String) {
 }
 
 @Composable
-fun showJobDetail(navController: NavController, job: JobQuery.Job, viewModel: JobDetailViewModel) {
+fun ShowJobDetail(navController: NavController, job: JobQuery.Job, viewModel: JobDetailViewModel) {
 
     var jobAppliedState by remember { mutableStateOf(job.haveIApplied) }
-    val applyJobState by viewModel.applyJobStateFlow.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
-    when (applyJobState) {
-        is NetworkResult.Success -> {
-            jobAppliedState = true
-            navController.previousBackStackEntry
-                ?.savedStateHandle
-                ?.set(RELOAD_DATA, true)
+    LaunchedEffect(viewModel.applyJobSharedFlow) {
+        viewModel.applyJobSharedFlow.collect {
+            when (it) {
+                is NetworkResult.Success -> {
+                    ProgressHelper.dismissDialog()
+                    jobAppliedState = true
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set(RELOAD_DATA, true)
+                }
+
+                is NetworkResult.Loading -> ProgressHelper.showDialog(context)
+                is NetworkResult.Error -> ProgressHelper.dismissDialog()
+                else -> {}
+            }
         }
-
-        is NetworkResult.Loading -> ProgressHelper.showDialog(LocalContext.current)
-        is NetworkResult.Error -> ProgressHelper.dismissDialog()
-        else -> {}
     }
 
     Scaffold(
