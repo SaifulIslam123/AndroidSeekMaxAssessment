@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -42,6 +43,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.seekmax.assessment.repository.NetworkResult
+import com.seekmax.assessment.ui.ProgressHelper
 import com.seekmax.assessment.ui.screen.BottomNavigationScreens
 import com.seekmax.assessment.ui.theme.button
 
@@ -92,11 +94,12 @@ fun LoginScreen(navController: NavController) {
 fun PerformLogin(navController: NavController, viewModel: LoginViewModel) {
     val loginState by viewModel.loginState.collectAsStateWithLifecycle()
     when (loginState) {
-        is NetworkResult.Loading -> {}
         is NetworkResult.Success -> {
             navController.navigate(BottomNavigationScreens.Home.route) { popUpTo(0) }
         }
-        is NetworkResult.Error -> {}
+
+        is NetworkResult.Loading -> ProgressHelper.showDialog(LocalContext.current)
+        is NetworkResult.Error -> ProgressHelper.dismissDialog()
         else -> {}
     }
 }

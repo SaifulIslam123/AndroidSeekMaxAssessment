@@ -13,7 +13,7 @@ import android.widget.TextView
 
 object ProgressHelper {
     private var dialog: AlertDialog? = null
-    fun showDialog(context: Context?, message: String?) {
+    fun showDialog(context: Context?, message: String = "Please wait...") {
         if (dialog == null) {
             val llPadding = 30
             val ll = LinearLayout(context)

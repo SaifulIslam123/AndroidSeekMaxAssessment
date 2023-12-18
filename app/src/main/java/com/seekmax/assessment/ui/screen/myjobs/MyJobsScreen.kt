@@ -3,10 +3,12 @@ package com.seekmax.assessment.ui.screen.myjobs
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.seekmax.assessment.repository.NetworkResult
+import com.seekmax.assessment.ui.ProgressHelper
 import com.seekmax.assessment.ui.component.JobList
 import com.seekmax.assessment.ui.component.NonLoginView
 import com.seekmax.assessment.ui.screen.profile.ProfileViewModel
@@ -33,6 +35,9 @@ fun ShowMyJobList(navController: NavController) {
                 JobList(navController = navController, jobList = it, false)
             }
         }
+
+        is NetworkResult.Loading -> ProgressHelper.showDialog(LocalContext.current)
+        is NetworkResult.Error -> ProgressHelper.dismissDialog()
 
         else -> {
         }

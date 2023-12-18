@@ -1,5 +1,6 @@
 package com.seekmax.assessment.ui.screen.home
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -14,12 +15,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.seekmax.assessment.ComposeMainActivity
 import com.seekmax.assessment.RELOAD_DATA
 import com.seekmax.assessment.repository.NetworkResult
+import com.seekmax.assessment.ui.ProgressHelper
 import com.seekmax.assessment.ui.component.JobList
 import com.seekmax.assessment.ui.theme.backgroundSecondary
 
@@ -31,9 +35,6 @@ fun HomeScreen(navController: NavController) {
     val searchStateFlow by viewModel.searchStateFlow.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) {
-        /*if (activeJobList is NetworkResult.Empty)
-            viewModel.getActiveJobList()
-*/
         if (navController.currentBackStackEntry!!.savedStateHandle.contains(RELOAD_DATA)) {
             val reloadData =
                 navController.currentBackStackEntry!!.savedStateHandle.get<Boolean>(
@@ -68,9 +69,18 @@ fun HomeScreen(navController: NavController) {
 
                 when (activeJobList) {
                     is NetworkResult.Success -> {
+                        ProgressHelper.dismissDialog()
                         activeJobList.data?.let {
                             JobList(navController = navController, jobList = it)
                         }
+                    }
+
+                    is NetworkResult.Loading -> {
+                        ProgressHelper.showDialog(LocalContext.current)
+                    }
+
+                    is NetworkResult.Error -> {
+                        ProgressHelper.dismissDialog()
                     }
 
                     else -> {

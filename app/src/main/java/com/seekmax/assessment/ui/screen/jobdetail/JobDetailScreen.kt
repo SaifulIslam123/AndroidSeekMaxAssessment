@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -38,6 +39,7 @@ import com.seekmax.assessment.JobQuery
 import com.seekmax.assessment.R
 import com.seekmax.assessment.RELOAD_DATA
 import com.seekmax.assessment.repository.NetworkResult
+import com.seekmax.assessment.ui.ProgressHelper
 import com.seekmax.assessment.ui.screen.BottomNavigationScreens
 import com.seekmax.assessment.ui.theme.button
 import com.seekmax.assessment.ui.theme.textPrimary
@@ -61,6 +63,8 @@ fun JobDetailScreen(navController: NavController, jobId: String) {
                     showJobDetail(navController, jobState.data!!, viewModel)
                 }
 
+                is NetworkResult.Loading -> ProgressHelper.showDialog(LocalContext.current)
+                is NetworkResult.Error -> ProgressHelper.dismissDialog()
                 else -> {}
             }
         }
@@ -82,6 +86,8 @@ fun showJobDetail(navController: NavController, job: JobQuery.Job, viewModel: Jo
                 ?.set(RELOAD_DATA, true)
         }
 
+        is NetworkResult.Loading -> ProgressHelper.showDialog(LocalContext.current)
+        is NetworkResult.Error -> ProgressHelper.dismissDialog()
         else -> {}
     }
 

@@ -1,13 +1,10 @@
 package com.seekmax.assessment.ui.screen.profile
 
 import android.util.Log
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -40,7 +37,6 @@ import com.seekmax.assessment.ComposeMainActivity
 import com.seekmax.assessment.repository.NetworkResult
 import com.seekmax.assessment.ui.ProgressHelper
 import com.seekmax.assessment.ui.component.NonLoginView
-import com.seekmax.assessment.ui.screen.BottomNavigationScreens
 import com.seekmax.assessment.ui.theme.button
 
 @Composable
@@ -58,13 +54,12 @@ fun ProfileView(viewModel: ProfileViewModel) {
     var confirmPasswordState by remember { mutableStateOf("") }
     val userNameSateFlow by viewModel.userNameSateFlow.collectAsStateWithLifecycle()
     val passwordSateFlow by viewModel.passwordSateFlow.collectAsStateWithLifecycle()
-    val context = LocalContext.current as ComposeMainActivity
     val scrollState = rememberScrollState()
 
 
     when (userNameSateFlow) {
         is NetworkResult.Loading -> {
-            ProgressHelper.showDialog(context, "Please wait...")
+            ProgressHelper.showDialog(LocalContext.current)
         }
 
         is NetworkResult.Success -> {
@@ -80,7 +75,7 @@ fun ProfileView(viewModel: ProfileViewModel) {
 
     when (passwordSateFlow) {
         is NetworkResult.Loading -> {
-            ProgressHelper.showDialog(context, "Please wait...")
+            ProgressHelper.showDialog(LocalContext.current)
         }
 
         is NetworkResult.Success -> {
