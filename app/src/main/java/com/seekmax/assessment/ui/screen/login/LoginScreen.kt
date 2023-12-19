@@ -1,5 +1,6 @@
 package com.seekmax.assessment.ui.screen.login
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -108,8 +109,8 @@ fun PerformLogin(navController: NavController, viewModel: LoginViewModel) {
                 }
 
                 is NetworkResult.Error -> {
-                    Toast.makeText(context, "Error occurred", Toast.LENGTH_LONG).show()
                     ProgressHelper.dismissDialog()
+                    Toast.makeText(context, it.message.toString(), Toast.LENGTH_LONG).show()
                 }
 
                 else -> {}

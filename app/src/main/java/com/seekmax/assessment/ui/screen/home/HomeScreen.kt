@@ -23,6 +23,7 @@ import com.seekmax.assessment.RELOAD_DATA
 import com.seekmax.assessment.repository.NetworkResult
 import com.seekmax.assessment.ui.ProgressHelper
 import com.seekmax.assessment.ui.component.JobList
+import com.seekmax.assessment.ui.component.MessageText
 import com.seekmax.assessment.ui.theme.backgroundSecondary
 
 @Composable
@@ -75,6 +76,7 @@ fun HomeScreen(navController: NavController) {
 
                     is NetworkResult.Error -> {
                         ProgressHelper.dismissDialog()
+                        MessageText(text = activeJobList.message.toString())
                     }
 
                     else -> {

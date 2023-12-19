@@ -6,4 +6,5 @@ const val USER_NAME: String = "name"
 const val RELOAD_DATA: String = "reloaddata"
 const val JOB_ID = "jobId"
 const val JOB_DETAIL = "jobdetail"
+const val ERROR_MESSAGE = "Error Occurred"
 

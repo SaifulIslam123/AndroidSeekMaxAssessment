@@ -1,21 +1,17 @@
 package com.seekmax.assessment.ui.screen.myjobs
 
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.seekmax.assessment.repository.NetworkResult
 import com.seekmax.assessment.ui.ProgressHelper
+import com.seekmax.assessment.ui.component.MessageText
 import com.seekmax.assessment.ui.component.JobList
 import com.seekmax.assessment.ui.component.NonLoginView
-import com.seekmax.assessment.ui.screen.profile.ProfileViewModel
 
 @Composable
 fun MyJobsScreen(navController: NavController) {
@@ -38,12 +34,18 @@ fun ShowMyJobList(navController: NavController, viewModel: MyJobsViewModel) {
         is NetworkResult.Success -> {
             ProgressHelper.dismissDialog()
             myJobList.data?.let {
-                JobList(navController = navController, jobList = it, false)
+                if (it.isNotEmpty())
+                    JobList(navController = navController, jobList = it, false)
+                else
+                    MessageText(text = "NO JOB FOUND")
             }
         }
 
         is NetworkResult.Loading -> ProgressHelper.showDialog(LocalContext.current)
-        is NetworkResult.Error -> ProgressHelper.dismissDialog()
+        is NetworkResult.Error -> {
+            ProgressHelper.dismissDialog()
+            MessageText(text = myJobList.message.toString())
+        }
 
         else -> {
         }

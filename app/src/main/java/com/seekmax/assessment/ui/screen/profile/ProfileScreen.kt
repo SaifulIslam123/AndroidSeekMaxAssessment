@@ -14,9 +14,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -30,6 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -167,14 +172,40 @@ fun ProfileView(navController: NavController, viewModel: ProfileViewModel) {
             modifier = Modifier.padding(top = 30.dp),
             style = MaterialTheme.typography.h6
         )
+        var passwordVisibility: Boolean by remember { mutableStateOf(false) }
         TextField(
+            visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                IconButton(onClick = {
+                    passwordVisibility = !passwordVisibility
+                }) {
+                    Icon(
+                        if (passwordVisibility) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                        contentDescription = "",
+                        tint = Color.Gray
+                    )
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 10.dp),
             value = newPasswordState,
             onValueChange = { newPasswordState = it },
             placeholder = { Text(text = "Enter New password") })
+        var confirmPasswordVisibility: Boolean by remember { mutableStateOf(false) }
         TextField(
+            visualTransformation = if (confirmPasswordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                IconButton(onClick = {
+                    confirmPasswordVisibility = !confirmPasswordVisibility
+                }) {
+                    Icon(
+                        if (confirmPasswordVisibility) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                        contentDescription = "",
+                        tint = Color.Gray
+                    )
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 10.dp),
@@ -205,9 +236,9 @@ fun ProfileView(navController: NavController, viewModel: ProfileViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 20.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = button)
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
             ) {
-                Text("LOGOUT", color = Color.Red)
+                Text("LOGOUT", color = Color.White)
             }
         }
 

@@ -23,7 +23,7 @@ class JobDetailViewModel @Inject constructor(
     private val _jobDetailStateFlow =
         MutableStateFlow<NetworkResult<JobQuery.Job>>(NetworkResult.Empty())
     val jobDetailStateFlow = _jobDetailStateFlow.asStateFlow()
-    private val _applyJobSharedFlow = MutableSharedFlow<NetworkResult<Boolean>>()
+    private val _applyJobSharedFlow = MutableSharedFlow<NetworkResult<String>>()
     val applyJobSharedFlow = _applyJobSharedFlow.asSharedFlow()
 
     fun getJobDetail(id: String) = viewModelScope.launch {
