@@ -1,12 +1,14 @@
 package com.seekmax.assessment.ui.screen.home
 
 import android.app.appsearch.exceptions.AppSearchException
+import android.util.Log
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.ApolloResponse
 import com.apollographql.apollo3.api.Error
 import com.apollographql.apollo3.api.Optional
 import com.apollographql.apollo3.exception.ApolloException
 import com.seekmax.assessment.ActiveQuery
+import com.seekmax.assessment.ERROR_MESSAGE
 import com.seekmax.assessment.SearchQuery
 import com.seekmax.assessment.fragment.JobInfo
 import com.seekmax.assessment.repository.NetworkResult
@@ -35,14 +37,16 @@ class HomeRepository @Inject constructor(private val apolloClient: ApolloClient)
                     )
                 ).execute()
                 val jobInfoList = ArrayList<JobInfo>()
-                response.data?.active?.jobs?.forEach {
-                    jobInfoList.add(it.jobInfo)
-                    emit(NetworkResult.Success(data = jobInfoList.toList()))
-                } ?: run {
-                    response.errors?.let {
-                        if (it.isNotEmpty()) emit(NetworkResult.Error(it[0].message))
+                response.data?.let {
+                    it.active?.jobs?.let {
+                        it.forEach { jobInfoList.add(it.jobInfo) }
+                        emit(NetworkResult.Success(data = jobInfoList.toList()))
+                    } ?: run {
+                        response.errors?.let {
+                            if (it.isNotEmpty()) emit(NetworkResult.Error(it[0].message))
+                        }
                     }
-                }
+                } ?: emit(NetworkResult.Error(ERROR_MESSAGE))
             } catch (e: ApolloException) {
                 emit(NetworkResult.Error(e.message.toString()))
             }
@@ -56,19 +60,29 @@ class HomeRepository @Inject constructor(private val apolloClient: ApolloClient)
 
         return flow {
             emit(NetworkResult.Loading())
-            val response = apolloClient.query(
-                SearchQuery(
-                    search,
-                    Optional.present(100),
-                    Optional.present(1)
-                )
-            ).execute()
+            try {
+                val response = apolloClient.query(
+                    SearchQuery(
+                        search,
+                        Optional.present(100),
+                        Optional.present(1)
+                    )
+                ).execute()
+                val jobInfoList = ArrayList<JobInfo>()
 
-            val jobInfoList = ArrayList<JobInfo>()
-            response.data?.search?.jobs?.forEach {
-                jobInfoList.add(it.jobInfo)
+                response.data?.let {
+                    it.search?.jobs?.let {
+                        it.forEach { jobInfoList.add(it.jobInfo) }
+                        emit(NetworkResult.Success(data = jobInfoList.toList()))
+                    } ?: run {
+                        response.errors?.let {
+                            if (it.isNotEmpty()) emit(NetworkResult.Error(it[0].message))
+                        }
+                    }
+                } ?: emit(NetworkResult.Error(ERROR_MESSAGE))
+            } catch (e: ApolloException) {
+                emit(NetworkResult.Error(e.message.toString()))
             }
-            emit(NetworkResult.Success(data = jobInfoList.toList()))
         }.catch {
             emit(NetworkResult.Error(it.message.toString()))
         }.flowOn(Dispatchers.IO)

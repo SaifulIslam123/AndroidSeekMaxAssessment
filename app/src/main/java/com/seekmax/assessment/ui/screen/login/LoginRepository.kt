@@ -1,9 +1,12 @@
 package com.seekmax.assessment.ui.screen.login
 
 import android.content.SharedPreferences
+import android.util.Log
 import com.apollographql.apollo3.ApolloClient
+import com.apollographql.apollo3.exception.ApolloException
 import com.apollographql.apollo3.network.http.HttpInfo
 import com.seekmax.assessment.AuthMutation
+import com.seekmax.assessment.ERROR_MESSAGE
 import com.seekmax.assessment.USER_NAME
 import com.seekmax.assessment.USER_TOKEN
 import com.seekmax.assessment.repository.NetworkResult
@@ -22,16 +25,24 @@ class LoginRepository @Inject constructor(
 
         return flow {
             emit(NetworkResult.Loading())
-            val response = apolloClient.mutation(AuthMutation(userName, password)).execute()
-            val statusCode = response.executionContext[HttpInfo]?.statusCode ?: 0
-            val token = response.data?.auth
-            if (statusCode == 200 && !token.isNullOrEmpty()) {
-                preferences.edit().putString(USER_TOKEN, token).apply()
-                preferences.edit().putString(USER_NAME, userName).apply()
-                emit(NetworkResult.Success(statusCode, token))
-            } else {
-                emit(NetworkResult.Error(token.toString(), code = statusCode))
+            try {
+                val response = apolloClient.mutation(AuthMutation(userName, password)).execute()
+                response.data?.let {
+                    val token = it.auth
+                    if (!it.auth.isNullOrEmpty()) {
+                        preferences.edit().putString(USER_TOKEN, token).apply()
+                        preferences.edit().putString(USER_NAME, userName).apply()
+                        emit(NetworkResult.Success(data = token))
+                    } else {
+                        response.errors?.let {
+                            if (it.isNotEmpty()) emit(NetworkResult.Error(it[0].message))
+                        }
+                    }
+                } ?: emit(NetworkResult.Error(ERROR_MESSAGE))
+            } catch (e: ApolloException) {
+                emit(NetworkResult.Error(e.message.toString()))
             }
+
         }.catch {
             emit(NetworkResult.Error(it.message.toString()))
         }.flowOn(Dispatchers.IO)

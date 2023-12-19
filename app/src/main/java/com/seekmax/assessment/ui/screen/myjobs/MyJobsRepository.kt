@@ -2,6 +2,7 @@ package com.seekmax.assessment.ui.screen.myjobs
 
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.Optional
+import com.seekmax.assessment.ERROR_MESSAGE
 import com.seekmax.assessment.MyJobsQuery
 import com.seekmax.assessment.fragment.JobInfo
 import com.seekmax.assessment.repository.NetworkResult
@@ -25,10 +26,19 @@ class MyJobsRepository @Inject constructor(private val apolloClient: ApolloClien
                 )
             ).execute()
             val jobInfoList = ArrayList<JobInfo>()
-            response.data?.myJobs?.jobs?.forEach {
-                jobInfoList.add(it.jobInfo)
-            }
-            emit(NetworkResult.Success(data = jobInfoList.toList()))
+            response.data?.let {
+                it.myJobs?.jobs?.let { jobs ->
+                    jobs.forEach {
+                        jobInfoList.add(it.jobInfo)
+                    }
+                    if (jobInfoList.isNotEmpty()) emit(NetworkResult.Success(data = jobInfoList.toList()))
+                } ?: run {
+                    response.errors?.let {
+                        if (it.isNotEmpty()) emit(NetworkResult.Error(it[0].message))
+                    }
+                }
+            } ?: emit(NetworkResult.Error(ERROR_MESSAGE))
+
         }.catch {
             emit(NetworkResult.Error(it.message.toString()))
         }.flowOn(Dispatchers.IO)
